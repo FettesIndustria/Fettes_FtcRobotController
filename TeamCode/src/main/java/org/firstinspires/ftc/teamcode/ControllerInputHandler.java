@@ -11,6 +11,7 @@ public class ControllerInputHandler {
         this.gamepad = gamepad;
     }
 
+
     // buttons
     public boolean isButtonPressed(char button) {
         switch (button) {
