@@ -28,28 +28,28 @@ public class ControllerInputHandler {
     }
 
     // joysticks
-    public double getLeftStickX() {
+    public float getLeftStickX() {
         return gamepad.left_stick_x;
     }
 
-    public double getLeftStickY() {
+    public float getLeftStickY() {
         return gamepad.left_stick_y;
     }
 
-    public double getRightStickX() {
+    public float getRightStickX() {
         return gamepad.right_stick_x;
     }
 
-    public double getRightStickY() {
+    public float getRightStickY() {
         return gamepad.right_stick_y;
     }
 
     // triggers
-    public double leftTrigger() {
+    public float leftTrigger() {
         return gamepad.left_trigger;
     }
 
-    public double rightTrigger() {
+    public float rightTrigger() {
         return gamepad.right_trigger;
     }
 

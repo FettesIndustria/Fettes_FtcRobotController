@@ -54,7 +54,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class Main extends OpMode {
     private ControllerInputHandler controllerInput;
     private DcMotor leftMotor;
-
     private DcMotor rightMotor;
     private DcMotor hdHexMotor;
 
@@ -70,6 +69,7 @@ public class Main extends OpMode {
         leftMotor = hardwareMap.get(DcMotor.class, "left");
         leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
         rightMotor = hardwareMap.get(DcMotor.class, "right");
         rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -78,12 +78,20 @@ public class Main extends OpMode {
     public void loop() {
         boolean isButtonAPressed = controllerInput.isButtonPressed('a');
         boolean isButtonBPressed = controllerInput.isButtonPressed('b');
-        //boolean isButtonXPressed = controllerInput.isButtonPressed('x');
-        //boolean isButtonYPressed = controllerInput.isButtonPressed('y');
+        boolean isButtonXPressed = controllerInput.isButtonPressed('x');
+        boolean isButtonYPressed = controllerInput.isButtonPressed('y');
+
+        //boolean leftBumper = controllerInput.leftBumper();
+        //boolean rightBumper = controllerInput.rightBumper();
+
+        float leftStickX = controllerInput.getLeftStickX();
+        float leftStickY = controllerInput.getLeftStickY();
+        telemetry.addData("Left stick has X value:\t", leftStickX);
+        telemetry.addData("Left stick has Y value:\t", leftStickY);
 
         //coreHexMotor.setPower(isButtonAPressed ? 0.5 : 0);
         rightMotor.setPower(isButtonAPressed ? 1 : 0);
-        leftMotor.setPower(isButtonBPressed ? 1 : 0);
+        leftMotor.setPower(isButtonAPressed ? 1 : 0);
 
         telemetry.addData("Button A Pressed ", false); // a pressed
         telemetry.addData("Button B Pressed ", false); // b pressed
