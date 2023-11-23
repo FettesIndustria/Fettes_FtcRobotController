@@ -33,7 +33,7 @@ public class ControllerInputHandler {
     }
 
     public float getLeftStickY() {
-        return gamepad.left_stick_y;
+        return -gamepad.left_stick_y;
     }
 
     public float getRightStickX() {
@@ -41,7 +41,7 @@ public class ControllerInputHandler {
     }
 
     public float getRightStickY() {
-        return gamepad.right_stick_y;
+        return -gamepad.right_stick_y;
     }
 
     // triggers
