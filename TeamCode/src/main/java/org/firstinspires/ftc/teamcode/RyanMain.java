@@ -1,10 +1,17 @@
+package org.firstinspires.ftc.teamcode;
+
+import static java.lang.Math.PI;
+import static java.lang.Math.atan;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.ControllerInputHandler;
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Main", group = "TeleOp")
+
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "RyanMain", group = "TeleOp")
 public class RyanMain extends OpMode {
     private ControllerInputHandler controllerInput;
     private DcMotor leftMotorfront;
@@ -40,9 +47,40 @@ public class RyanMain extends OpMode {
     }
     @Override
     public void loop() {
+        float leftStickX = controllerInput.getLeftStickX();
+        float leftStickY = controllerInput.getLeftStickY();
+        telemetry.addData("Left stick has X value:\t", leftStickX);
+        telemetry.addData("Left stick has Y value:\t", leftStickY);
+        double theta = atan(leftStickY/leftStickX);
+
+        //positive between 0 and pi
+        if(theta>=0 && theta<(PI/2)){
+            telemetry.addData("rightup", theta);
+            telemetry.addData("BC: ", (sin((2*theta)-(PI/2))));
+            telemetry.addData("AD: ", (cos((2*theta)-(PI/2))));
+        }
+        if(theta>(PI/2) && theta<(PI)){
+            telemetry.addData("leftdown", theta);
+            telemetry.addData("BC: ", -(sin((2*theta)+(PI/2))));
+            telemetry.addData("AD: ", -(cos((2*theta)+(PI/2))));
+        }
+
+
+        if(theta<0 && theta>(-PI/2)){
+            telemetry.addData("leftup", theta);
+            telemetry.addData("AD: ", -(sin((2*theta)-(PI/2))));
+            telemetry.addData("BC: ", -(cos((2*theta)-(PI/2))));
+        }
+        if(theta<(-PI/2) && theta>(-PI)){
+            telemetry.addData("rightdown", theta);
+            telemetry.addData("AD: ", -(sin((2*theta)+(PI/2))));
+            telemetry.addData("BC: ", -(cos((2*theta)+(PI/2))));
+        }
+
+
 
     }
-    public void forward()
+    /*public void forward()
     {
         leftMotorfront.setPower(speed);
         leftMotorback.setPower(speed);
@@ -114,7 +152,7 @@ public class RyanMain extends OpMode {
         leftMotorback.setPower(speed);
         rightMotorfront.setPower(-speed);
         rightMotorback.setPower(-speed);
-
+    }*/
 
 }
 
