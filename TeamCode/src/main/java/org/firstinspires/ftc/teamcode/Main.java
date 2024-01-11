@@ -36,7 +36,7 @@ public class Main extends OpMode {
 
         //coreHexMotor.setPower(isButtonAPressed ? 0.5 : 0);
         hdHexMotor.setPower(isButtonBPressed ? 0.5 : 0);
-        
+
         telemetry.addData("Button A Pressed ", false); // a pressed
         telemetry.addData("Button B Pressed ", false); // b pressed
         telemetry.update();
@@ -49,6 +49,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Main", group = "TeleOp")
 public class Main extends OpMode {
@@ -56,6 +57,8 @@ public class Main extends OpMode {
     private DcMotor leftMotor;
     private DcMotor rightMotor;
     private DcMotor coreHexMotor;
+
+    private Servo Servomotor;
 
 
     @Override
@@ -66,6 +69,9 @@ public class Main extends OpMode {
         coreHexMotor = hardwareMap.get(DcMotor.class, "coreHexMotor");
         coreHexMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         coreHexMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        Servomotor = hardwareMap.get(Servo.class, "Servomotor");
+        Servomotor.setDirection(Servo.Direction.FORWARD);
 
         leftMotor = hardwareMap.get(DcMotor.class, "left");
         leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -81,6 +87,8 @@ public class Main extends OpMode {
         boolean isButtonBPressed = controllerInput.isButtonPressed('b');
         boolean isButtonXPressed = controllerInput.isButtonPressed('x');
         //boolean isButtonYPressed = controllerInput.isButtonPressed('y');
+        float lefttrigger = controllerInput.leftTrigger();
+        float righttrigger = controllerInput.rightTrigger();
 
         //boolean leftBumper = controllerInput.leftBumper();
         //boolean rightBumper = controllerInput.rightBumper();
@@ -107,6 +115,27 @@ public class Main extends OpMode {
             leftMotor.setPower(0);
             telemetry.addData("not moving", leftStickY - leftStickY);
         }
+        if(lefttrigger > 0)
+        {
+            coreHexMotor.setPower(lefttrigger);
+        }
+        else{
+            coreHexMotor.setPower(0);
+        }
+        if(righttrigger > 0)
+        {
+            Servomotor.setPosition(righttrigger);
+            telemetry.addData("right trigger: ", righttrigger);
+        }
+        else{
+            Servomotor.setPosition(0);
+            telemetry.addData("right trigger: ", righttrigger);
+        }
+
+
+
+        telemetry.addData("going forward", leftStickY - leftStickY);
+
 
         if(isButtonAPressed == true)
         {
@@ -116,16 +145,7 @@ public class Main extends OpMode {
         {
             leftMotor.setPower(1);
         }
-        if(isButtonXPressed == true)
-        {
-            coreHexMotor.setPower(1);
-            telemetry.addData("corehexmotor turning", leftStickY - leftStickY);
-        }
-        else if(isButtonXPressed == false)
-        {
-            coreHexMotor.setPower(0);
-            telemetry.addData("corehexmotor stops", leftStickY - leftStickY);
-        }
+
 
 
         telemetry.update();
