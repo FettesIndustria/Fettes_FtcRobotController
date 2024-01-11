@@ -49,29 +49,24 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Main", group = "TeleOp")
-public class Main extends OpMode {
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Main_Jamie", group = "TeleOp")
+public class Main_Jamie extends OpMode {
     private ControllerInputHandler controllerInput;
     private DcMotor leftMotor;
     private DcMotor rightMotor;
-    private DcMotor coreHexMotor;
+    private DcMotor hdHexMotor;
 
-    private Servo Servomotor;
+    double speed = 1.0;
 
 
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
-
-
+        /*
+        coreHexMotorClass = new MotorRun(coreHexMotor, 0, "forward"); // power, direction
         coreHexMotor = hardwareMap.get(DcMotor.class, "coreHexMotor");
-        coreHexMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        coreHexMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        Servomotor = hardwareMap.get(Servo.class, "Servomotor");
-        Servomotor.setDirection(Servo.Direction.FORWARD);
+        coreHexMotor.setDirection(DcMotorSimple.Direction.FORWARD);*/
 
         leftMotor = hardwareMap.get(DcMotor.class, "left");
         leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -86,68 +81,56 @@ public class Main extends OpMode {
         boolean isButtonAPressed = controllerInput.isButtonPressed('a');
         boolean isButtonBPressed = controllerInput.isButtonPressed('b');
         boolean isButtonXPressed = controllerInput.isButtonPressed('x');
-        //boolean isButtonYPressed = controllerInput.isButtonPressed('y');
-        float lefttrigger = controllerInput.leftTrigger();
-        float righttrigger = controllerInput.rightTrigger();
+        boolean isButtonYPressed = controllerInput.isButtonPressed('y');
+        float leftStickX = controllerInput.getLeftStickX();
+        float leftStickY = controllerInput.getLeftStickY();
 
         //boolean leftBumper = controllerInput.leftBumper();
         //boolean rightBumper = controllerInput.rightBumper();
+        if(isButtonAPressed){
+            if(speed == 1) speed = 0.5;
+            else speed = 1;
+        }
 
-        float leftStickX = controllerInput.getLeftStickX();
-        float leftStickY = controllerInput.getLeftStickY();
-        telemetry.addData("Left stick has X value:\t", leftStickX);
-        telemetry.addData("Left stick has Y value:\t", leftStickY);
 
         //coreHexMotor.setPower(isButtonAPressed ? 0.5 : 0);
-        if(leftStickY > 0){
-            rightMotor.setPower(leftStickY);
-            leftMotor.setPower(leftStickY);
-            telemetry.addData("going forward", leftStickY - leftStickY);
+        //
+        if(leftStickY > 0) {
+            if(leftStickX > 0){
+                rightMotor.setPower(speed * -leftStickX);
+                leftMotor.setPower(speed);
+            }
+            else if(leftStickX < 0){
+                rightMotor.setPower(speed);
+                leftMotor.setPower(speed * -leftStickX);
+            }
+            else{
+                rightMotor.setPower(speed);
+                leftMotor.setPower(speed);
+            }
         }
-        else if(leftStickY <0)
-        {
-            rightMotor.setPower(leftStickY);
-            leftMotor.setPower(leftStickY);
-            telemetry.addData("going backwards", leftStickY - leftStickY);
+        else if(leftStickY < 0) {
+            if(leftStickX > 0){
+                rightMotor.setPower(-speed * -leftStickX);
+                leftMotor.setPower(-speed);
+            }
+            else if(leftStickX < 0){
+                rightMotor.setPower(-speed);
+                leftMotor.setPower(-speed * -leftStickX);
+            }
+            else{
+                rightMotor.setPower(-speed);
+                leftMotor.setPower(-speed);
+            }
         }
-        else {
+        else{
             rightMotor.setPower(0);
             leftMotor.setPower(0);
-            telemetry.addData("not moving", leftStickY - leftStickY);
         }
-        if(lefttrigger > 0)
-        {
-            coreHexMotor.setPower(lefttrigger);
-        }
-        else{
-            coreHexMotor.setPower(0);
-        }
-        if(righttrigger > 0)
-        {
-            Servomotor.setPosition(righttrigger);
-            telemetry.addData("right trigger: ", righttrigger);
-        }
-        else{
-            Servomotor.setPosition(0);
-            telemetry.addData("right trigger: ", righttrigger);
-        }
-
-
-
-        telemetry.addData("going forward", leftStickY - leftStickY);
-
-
-        if(isButtonAPressed == true)
-        {
-            rightMotor.setPower(1);
-        }
-        if(isButtonBPressed == true)
-        {
-            leftMotor.setPower(1);
-        }
-
-
-
+        telemetry.addData("Left stick has X value:\t", leftStickX);
+        telemetry.addData("Left stick has Y value:\t", leftStickY);
+        telemetry.addData("Button A Pressed ", false); // a pressed
+        telemetry.addData("Button B Pressed ", false); // b pressed
         telemetry.update();
     }
 }

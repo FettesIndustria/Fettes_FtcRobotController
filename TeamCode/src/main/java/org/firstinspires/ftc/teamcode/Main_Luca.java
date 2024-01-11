@@ -47,6 +47,8 @@ public class Main_Luca extends OpMode {
         // set motor speeds
         // motors not defined yet
 
+
+
         boolean leftBumper = controllerInput.leftBumper();
         boolean rightBumper = controllerInput.rightBumper();
 
