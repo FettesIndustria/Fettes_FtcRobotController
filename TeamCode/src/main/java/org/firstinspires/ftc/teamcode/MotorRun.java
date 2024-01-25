@@ -26,7 +26,6 @@ public class MotorRun extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        System.out.println("failure");
-
+        System.out.println("MotorRun Failure");
     }
 }

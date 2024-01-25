@@ -28,6 +28,8 @@ public class Motor_test extends OpMode {
     public void loop() {
         double leftStickX = controllerInput.getLeftStickX();
         double leftStickY = -controllerInput.getLeftStickY();    // also negate the sign
+        double rightStickX = controllerInput.getRightStickX();
+        double rightStickY = -controllerInput.getRightStickY();    // also negate the sign
         telemetry.addData("Left stick has X value:\t", leftStickX);
         telemetry.addData("Left stick has Y value:\t", leftStickY);
 
@@ -35,9 +37,14 @@ public class Motor_test extends OpMode {
             myServo.setPosition(1);
         } else if (leftStickY < 0) {
             myServo.setPosition(0);
-        } else if (leftStickY == 0) {
-            myServo.setPosition(0.5);
         }
+
+        /*if (rightStickY > 0) {
+            coreHexMotor.setPower(turn_speed);
+        } else if (rightStickY < 0) {
+            coreHexMotor.setPower(-turn_speed);
+        }*/
+
         telemetry.update();
     }
 }

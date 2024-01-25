@@ -41,8 +41,8 @@ public class Main_Luca extends OpMode {
         double s = 0.5;  // sensitivity constant
 
         // use speed equations for AD and BC motors
-        double v_ad = (s / sqrt2) * (leftStickY + leftStickX);
-        double v_bc = (s / sqrt2) * (leftStickY - leftStickX);
+        double v_ad = -(s / sqrt2) * (leftStickY + leftStickX);
+        double v_bc = -(s / sqrt2) * (leftStickY - leftStickX);
 
         // set motor speeds
         // motors not defined yet

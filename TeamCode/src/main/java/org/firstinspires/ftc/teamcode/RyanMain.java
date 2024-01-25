@@ -3,23 +3,26 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "RyanMain", group = "TeleOp")
 public class RyanMain extends OpMode {
     private ControllerInputHandler controllerInput;
     private DcMotor motorA, motorB, motorC, motorD;
-    private DcMotor hdHexMotor, coreHexMotor;
-    private MotorRun coreHexMotorClass;
+    private DcMotor motorArm;
+    private Servo servoArm;
 
 
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
 
-        coreHexMotorClass = new MotorRun(coreHexMotor, 0, "forward"); // power, direction
-        coreHexMotor = hardwareMap.get(DcMotor.class, "coreHexMotor");
-        coreHexMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorArm = hardwareMap.get(DcMotor.class, "motorArm");
+        motorArm.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        servoArm = hardwareMap.get(Servo.class, "servoArm");
+        servoArm.setDirection(Servo.Direction.FORWARD);
 
         motorA = hardwareMap.get(DcMotor.class, "motorA");
         motorA.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
