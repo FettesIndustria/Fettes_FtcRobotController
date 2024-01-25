@@ -1,159 +1,92 @@
 package org.firstinspires.ftc.teamcode;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.atan;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 
-
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "RyanMain", group = "TeleOp")
 public class RyanMain extends OpMode {
     private ControllerInputHandler controllerInput;
-    private DcMotor leftMotorfront;
-    private DcMotor rightMotorfront;
-    private DcMotor leftMotorback;
-    private DcMotor rightMotorback;
-    private DcMotor hdHexMotor;
+    private DcMotor motorA, motorB, motorC, motorD;
+    private DcMotor hdHexMotor, coreHexMotor;
+    private MotorRun coreHexMotorClass;
 
 
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
-        /*
+
         coreHexMotorClass = new MotorRun(coreHexMotor, 0, "forward"); // power, direction
         coreHexMotor = hardwareMap.get(DcMotor.class, "coreHexMotor");
-        coreHexMotor.setDirection(DcMotorSimple.Direction.FORWARD);*/
+        coreHexMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        leftMotorfront = hardwareMap.get(DcMotor.class, "left");
-        leftMotorfront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftMotorfront.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorA = hardwareMap.get(DcMotor.class, "motorA");
+        motorA.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorA.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        rightMotorfront = hardwareMap.get(DcMotor.class, "right");
-        rightMotorfront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotorfront.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorB = hardwareMap.get(DcMotor.class, "motorB");
+        motorB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorB.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        leftMotorback = hardwareMap.get(DcMotor.class, "left");
-        leftMotorback.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftMotorback.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorC = hardwareMap.get(DcMotor.class, "motorC");
+        motorC.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorC.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        rightMotorback = hardwareMap.get(DcMotor.class, "right");
-        rightMotorback.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotorback.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorD = hardwareMap.get(DcMotor.class, "motorD");
+        motorD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorD.setDirection(DcMotorSimple.Direction.REVERSE);
     }
+
+    public void orthogonal_movement(double speed_ad, double speed_bc) {
+        motorA.setPower(speed_ad);
+        motorD.setPower(speed_ad);
+        motorB.setPower(speed_bc);
+        motorC.setPower(speed_bc);
+    }
+
+    public void pivot_left(double turn_speed) {
+        motorA.setPower(-turn_speed);
+        motorC.setPower(-turn_speed);
+        motorB.setPower(turn_speed);
+        motorD.setPower(turn_speed);
+    }
+
+    public void pivot_right(double turn_speed) {
+        motorA.setPower(turn_speed);
+        motorC.setPower(turn_speed);
+        motorB.setPower(-turn_speed);
+        motorD.setPower(-turn_speed);
+    }
+
     @Override
     public void loop() {
-        float leftStickX = controllerInput.getLeftStickX();
-        float leftStickY = controllerInput.getLeftStickY();
-        telemetry.addData("Left stick has X value:\t", leftStickX);
+        double sqrt2 = Math.sqrt(2);
+        double turn_speed = 0.1;
+        double s = 0.5;  // sensitivity constant
+
+        double leftStickX = controllerInput.getLeftStickX();
+        double leftStickY = -controllerInput.getLeftStickY();    // also negate the sign
+        telemetry.addData("\nLeft stick has X value:\t", leftStickX);
         telemetry.addData("Left stick has Y value:\t", leftStickY);
-        double theta = atan(leftStickY/leftStickX);
 
-        //positive between 0 and pi
-        if(theta>=0 && theta<(PI/2)){
-            telemetry.addData("rightup", theta);
-            telemetry.addData("BC: ", (sin((2*theta)-(PI/2))));
-            telemetry.addData("AD: ", (cos((2*theta)-(PI/2))));
-        }
-        if(theta>(PI/2) && theta<(PI)){
-            telemetry.addData("leftdown", theta);
-            telemetry.addData("BC: ", -(sin((2*theta)+(PI/2))));
-            telemetry.addData("AD: ", -(cos((2*theta)+(PI/2))));
-        }
+        // use speed equations for AD and BC motors
+        double speed_ad = -(s / sqrt2) * (leftStickY + leftStickX);
+        double speed_bc = -(s / sqrt2) * (leftStickY - leftStickX);
+        orthogonal_movement(speed_ad, speed_bc);
 
+        // set turn speeds (turning has higher priority than movement)
+        boolean leftBumper = controllerInput.leftBumper();
+        boolean rightBumper = controllerInput.rightBumper();
 
-        if(theta<0 && theta>(-PI/2)){
-            telemetry.addData("leftup", theta);
-            telemetry.addData("AD: ", -(sin((2*theta)-(PI/2))));
-            telemetry.addData("BC: ", -(cos((2*theta)-(PI/2))));
-        }
-        if(theta<(-PI/2) && theta>(-PI)){
-            telemetry.addData("rightdown", theta);
-            telemetry.addData("AD: ", -(sin((2*theta)+(PI/2))));
-            telemetry.addData("BC: ", -(cos((2*theta)+(PI/2))));
-        }
+        if (leftBumper) pivot_left(turn_speed);
+        if (rightBumper) pivot_right(turn_speed);
 
-
-
+        // write to/update telemetry
+        telemetry.addData("AD motor speeds:\t", speed_ad);
+        telemetry.addData("BC motor speeds:\t", speed_bc);
+        telemetry.update();
     }
-    /*public void forward()
-    {
-        leftMotorfront.setPower(speed);
-        leftMotorback.setPower(speed);
-        rightMotorfront.setPower(speed);
-        rightMotorback.setPower(speed);
-    }
-
-    public void moveright()
-    {
-        leftMotorfront.setPower(speed);
-        leftMotorback.setPower(-speed);
-        rightMotorfront.setPower(-speed);
-        rightMotorback.setPower(speed);
-    }
-
-    public void moveleft()
-    {
-        leftMotorfront.setPower(-speed);
-        leftMotorback.setPower(speed);
-        rightMotorfront.setPower(speed);
-        rightMotorback.setPower(-speed);
-    }
-    public void backward()
-    {
-        leftMotorfront.setPower(-speed);
-        leftMotorback.setPower(-speed);
-        rightMotorfront.setPower(-speed);
-        rightMotorback.setPower(-speed);
-    }
-
-    public void diagonalfright()
-    {
-        leftMotorfront.setPower(speed);
-        rightMotorback.setPower(speed);
-    }
-    public void diagonalfleft()
-    {
-        rightMotorfront.setPower(speed);
-        leftMotorback.setPower(speed);
-    }
-    public void diagonalbright()
-    {
-        leftMotorfront.setPower(-speed);
-        rightMotorback.setPower(-speed);
-    }
-    public void diagonalbleft()
-    {
-        rightMotorfront.setPower(-speed);
-        leftMotorback.setPower(-speed);
-    }
-
-    public void backturn()
-    {
-        leftMotorfront.setPower(speed);
-        leftMotorback.setPower(speed);
-        rightMotorfront.setPower(-speed);
-        rightMotorback.setPower(-speed);
-    }
-    public void leftturn()
-    {
-        leftMotorfront.setPower(-speed);
-        leftMotorback.setPower(-speed);
-        rightMotorfront.setPower(speed);
-        rightMotorback.setPower(speed);
-    }
-    public void rightturn()
-    {
-        leftMotorfront.setPower(speed);
-        leftMotorback.setPower(speed);
-        rightMotorfront.setPower(-speed);
-        rightMotorback.setPower(-speed);
-    }*/
-
 }
 
 
