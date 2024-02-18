@@ -17,7 +17,7 @@ public class RobotArm {
         initialiseMotors();
     }
 
-    public void initialiseMotors() {
+    private void initialiseMotors() {
         motorArm.setDirection(DcMotorSimple.Direction.FORWARD);
         servoArm.setDirection(Servo.Direction.FORWARD);
     }
