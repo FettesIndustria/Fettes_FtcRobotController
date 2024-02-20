@@ -11,10 +11,9 @@ public class ControllerInputHandler {
         this.gamepad = gamepad;
     }
 
-
     // buttons
-    public boolean isButtonPressed(char button) {
-        switch (button) {
+    public boolean isButtonPressed(char buttonName) {
+        switch (buttonName) {
             case 'a':
                 return gamepad.a;
             case 'b':
@@ -23,9 +22,28 @@ public class ControllerInputHandler {
                 return gamepad.x;
             case 'y':
                 return gamepad.y;
+            default:
+                return false;
         }
-        return false;
     }
+
+    public boolean isButtonPressed(String buttonName) {
+        switch (buttonName) {
+            case "options":
+                return gamepad.options;
+            case "cross":
+                return gamepad.cross;
+            case "square":
+                return gamepad.square;
+            case "circle":
+                return gamepad.circle;
+            case "triangle":
+                return gamepad.triangle;
+            default:
+                return false;
+        }
+    }
+
 
     // joysticks
     public float getLeftStickX() {
@@ -60,6 +78,21 @@ public class ControllerInputHandler {
 
     public boolean rightBumper() {
         return gamepad.right_bumper;
+    }
+
+    public boolean dpad(String direction) {
+        switch (direction) {
+            case "up":
+                return gamepad.dpad_up;
+            case "down":
+                return gamepad.dpad_down;
+            case "left":
+                return gamepad.dpad_left;
+            case "right":
+                return gamepad.dpad_right;
+            default:
+                return false;
+        }
     }
 }
 

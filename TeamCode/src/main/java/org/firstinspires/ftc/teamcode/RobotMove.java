@@ -10,16 +10,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-
 public class RobotMove {
     private DcMotor motorA, motorB, motorC, motorD;
     private static final double MAX_MOTOR_POWER = 0.98;    // set max speed to S
     private static final double TURN_SCALAR = 0.25;    // turning scalar (can be adjusted)
     private BNO055IMU imu; // Assuming BNO055IMU is the IMU class
-
     private Orientation defaultOrientation;
 
     public RobotMove(HardwareMap hardwareMap) {
+        if (hardwareMap == null) {
+            System.out.println("Null Hardware Map");
+        }
+
         motorA = hardwareMap.get(DcMotor.class, "motorA");
         motorB = hardwareMap.get(DcMotor.class, "motorB");
         motorC = hardwareMap.get(DcMotor.class, "motorC");
@@ -68,7 +70,7 @@ public class RobotMove {
     }
 
     // sets the motors to move orthogonally at some angle and power value while turning with speed turn_value
-    public void robot_centric_movement(double theta, double power, double turn_value) {
+    public void robotCentricMovement(double theta, double power, double turn_value) {
         double sin = Math.sin(theta - Math.PI/4);
         double cos = Math.cos(theta - Math.PI/4);
         double max = Math.max(sin, cos);
@@ -102,13 +104,13 @@ public class RobotMove {
     }
 
     // the same as robot centric movement except controls work relative to the field instead of the robot
-    public void field_centric_movement(double theta, double power, double turn_value) {
+    public void fieldCentricMovement(double theta, double power, double turn_value) {
         // get orientation of the robot relative to the field using IMU
         Orientation currentOrientation = getIMUOrientation();
         double deltaAngle = currentOrientation.firstAngle - defaultOrientation.firstAngle;
 
         // do movement with new angle
-        robot_centric_movement(theta - deltaAngle, power, turn_value);
+        robotCentricMovement(theta - deltaAngle, power, turn_value);
     }
 
     public void setDefaultOrientation() {
@@ -117,6 +119,10 @@ public class RobotMove {
 
     // gets the current orientation of the robot
     private Orientation getIMUOrientation() {
+        if (imu == null) {
+            System.out.println("Null IMU");
+            return new Orientation();
+        }
         return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
     }
 }

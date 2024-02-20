@@ -1,49 +1,3 @@
-/*import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
-import org.firstinspires.ftc.teamcode.ControllerInputHandler;
-import org.firstinspires.ftc.teamcode.MotorRun;
-
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Main", group = "TeleOp")
-public class Main extends OpMode {
-
-    private ControllerInputHandler controllerInput;
-    private DcMotor coreHexMotor;
-    private MotorRun coreHexMotorClass;
-    private DcMotor hdHexMotor;
-    private MotorRun hdHexMotorClass;
-
-
-    @Override
-    public void init() {
-        /*controllerInput = new ControllerInputHandler(gamepad1);
-        coreHexMotorClass = new MotorRun(coreHexMotor, 0, "forward"); // power, direction
-        coreHexMotor = hardwareMap.get(DcMotor.class, "coreHexMotor");
-        coreHexMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        hdHexMotorClass = new MotorRun(hdHexMotor, 0, "forward");
-        hdHexMotor = hardwareMap.get(DcMotor.class, "left");
-        hdHexMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        hdHexMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-    }
-    @Override
-    public void loop() {
-        boolean isButtonAPressed = controllerInput.isButtonPressed('a');
-        boolean isButtonBPressed = controllerInput.isButtonPressed('b');
-        boolean isButtonXPressed = controllerInput.isButtonPressed('x');
-        boolean isButtonYPressed = controllerInput.isButtonPressed('y');
-
-        //coreHexMotor.setPower(isButtonAPressed ? 0.5 : 0);
-        hdHexMotor.setPower(isButtonBPressed ? 0.5 : 0);
-
-        telemetry.addData("Button A Pressed ", false); // a pressed
-        telemetry.addData("Button B Pressed ", false); // b pressed
-        telemetry.update();
-    }
-}
-*/
-
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -53,19 +7,30 @@ public class Main extends OpMode {
 
     private ControllerInputHandler controllerInput;
     private RobotMove robotMove;
-    private RobotArm robotArm;
+    private SettingsManager settings;
 
-    private boolean fieldCentric = false;
+    //private RobotArm robotArm;
 
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
         robotMove = new RobotMove(hardwareMap);
-        robotArm = new RobotArm(hardwareMap);
+        settings = new SettingsManager(gamepad1, robotMove, telemetry);
+        //robotArm = new RobotArm(hardwareMap);
     }
 
     @Override
     public void loop() {
+        settings.checkSettingsButton();
+        if (settings.settingsButton.onMode) {
+            settings.changeSettings();
+        } else {
+            doMovement();
+        }
+        telemetry.update();
+    }
+
+    private void doMovement() {
         double leftStickX = controllerInput.getLeftStickX();
         double leftStickY = -controllerInput.getLeftStickY();    // also negate the sign
         double rightStickX = controllerInput.getRightStickX();
@@ -77,7 +42,10 @@ public class Main extends OpMode {
         telemetry.addData("Power:\t", power);
         telemetry.addData("Turn value:\t", rightStickX);
 
-        robotMove.robot_centric_movement(theta, power, rightStickX);
-        telemetry.update();
+        if (settings.settingsButton.onMode) {
+            robotMove.fieldCentricMovement(theta, power, rightStickX);
+        } else {
+            robotMove.robotCentricMovement(theta, power, rightStickX);
+        }
     }
 }
