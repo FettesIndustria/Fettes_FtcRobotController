@@ -26,7 +26,7 @@ public class SettingsManager {
     }
 
     // checks for a button toggle and returns whether or not the button mode has toggled (pressed)
-    public boolean checkButton(Button button) {
+    private boolean checkButton(Button button) {
         boolean hasToggled = false;
         boolean pressed = controllerInput.isButtonPressed(button.buttonType);
         if (!button.isPressed && pressed) {

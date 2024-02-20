@@ -42,7 +42,7 @@ public class Main extends OpMode {
         telemetry.addData("Power:\t", power);
         telemetry.addData("Turn value:\t", rightStickX);
 
-        if (settings.settingsButton.onMode) {
+        if (settings.fieldCentricMovement.onMode) {
             robotMove.fieldCentricMovement(theta, power, rightStickX);
         } else {
             robotMove.robotCentricMovement(theta, power, rightStickX);
