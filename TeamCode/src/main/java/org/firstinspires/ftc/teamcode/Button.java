@@ -5,9 +5,9 @@ public class Button {
     boolean onMode;
     boolean isPressed;
 
-    public Button(String buttonType, boolean mode) {
+    public Button(String buttonType, boolean initialMode) {
         this.buttonType = buttonType;
-        onMode = mode;
+        onMode = initialMode;
         isPressed = false;
     }
 }

@@ -24,6 +24,8 @@ public class MotorTest extends OpMode {
                 robotMove.setPower(motors[i], MOTOR_POWER);
                 telemetry.addData("Button", "Button " + buttons[i] + " is pressed");
                 telemetry.addData("Motor", "Motor " + motors[i] + " is moving");
+            } else {
+                robotMove.setPower(motors[i], 0);
             }
         }
 

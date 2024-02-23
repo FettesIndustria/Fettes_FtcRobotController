@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -11,17 +11,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class RobotMove {
-    private DcMotor motorA, motorB, motorC, motorD;
-    private static final double MAX_MOTOR_POWER = 0.98;    // set max speed to S
-    private static final double TURN_SCALAR = 0.25;    // turning scalar (can be adjusted)
-    private BNO055IMU imu; // Assuming BNO055IMU is the IMU class
+    private final DcMotor motorA, motorB, motorC, motorD;
+    private static final double MAX_AVAILABLE_POWER = 0.98;   // 2% reduction in max power
+    private static final double MAX_MOTOR_POWER = 0.9 * MAX_AVAILABLE_POWER;   // don't use all available power (too sensitive)
+    private static final double TURN_SCALAR = 0.6;    // turning scalar (can be adjusted)
+    private final BHI260IMU bhi260; // Assuming BHI260IMU is the IMU class
     private Orientation defaultOrientation;
 
     public RobotMove(HardwareMap hardwareMap) {
-        if (hardwareMap == null) {
-            System.out.println("Null Hardware Map");
-        }
-
         motorA = hardwareMap.get(DcMotor.class, "motorA");
         motorB = hardwareMap.get(DcMotor.class, "motorB");
         motorC = hardwareMap.get(DcMotor.class, "motorC");
@@ -31,24 +28,21 @@ public class RobotMove {
         defaultOrientation = getIMUOrientation(); // Initialize defaultOrientation
 
         // Initialize IMU
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters imuParameters = new BNO055IMU.Parameters();
-        imuParameters.mode = BNO055IMU.SensorMode.IMU;
-        imu.initialize(imuParameters);
+        bhi260 = new BHI260IMU(hardwareMap.i2cDeviceSynch.get("imu"), true);
     }
 
     private void initializeMotors() {
         motorA.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorA.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorA.setDirection(DcMotorSimple.Direction.REVERSE);
 
         motorB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorB.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorB.setDirection(DcMotorSimple.Direction.FORWARD);
 
         motorC.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorC.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorC.setDirection(DcMotorSimple.Direction.REVERSE);
 
         motorD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorD.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorD.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     // gives power to any wheel motor
@@ -69,20 +63,33 @@ public class RobotMove {
         }
     }
 
+    // converts joystick coords to an angle
+    private double xy_to_angle(double x, double y) {
+        if (x >= 0 && y == 0) return 0.0;
+        if (x == 0 && y > 0) return Math.PI / 2;
+        if (x < 0 && y == 0) return Math.PI;
+        if (x == 0 && y < 0) return 3 * Math.PI / 2;
+        return Math.atan2(y, x);
+    }
+
     // sets the motors to move orthogonally at some angle and power value while turning with speed turn_value
-    public void robotCentricMovement(double theta, double power, double turn_value) {
+    public void robotCentricMovement(double x, double y, double offset_angle, double turn_value) {
+        double theta = xy_to_angle(x, y) - offset_angle;
+        double power = Math.sqrt(x*x + y*y);
+
         double sin = Math.sin(theta - Math.PI/4);
         double cos = Math.cos(theta - Math.PI/4);
-        double max = Math.max(sin, cos);
+        double max = Math.max(Math.abs(sin), Math.abs(cos));
 
         // orthogonal movement (normalised sin and cos to make use of all available power)
-        // multiply by S to account for any variation in motor strength (2% assumed)
-        double speed_a = power * sin/max * MAX_MOTOR_POWER;
-        double speed_b = power * cos/max * MAX_MOTOR_POWER;
-        double speed_c = power * cos/max * MAX_MOTOR_POWER;
-        double speed_d = power * sin/max * MAX_MOTOR_POWER;
+        // multiply by MAX_MOTOR_POWER to account for any variation in motor strength (2% assumed) + sensitivity
+        double speed_a = power * cos/max * MAX_MOTOR_POWER;
+        double speed_b = power * sin/max * MAX_MOTOR_POWER;
+        double speed_c = power * sin/max * MAX_MOTOR_POWER;
+        double speed_d = power * cos/max * MAX_MOTOR_POWER;
 
         // add turning
+        if (y < 0) turn_value = -turn_value;
         speed_a += turn_value * TURN_SCALAR;
         speed_b -= turn_value * TURN_SCALAR;
         speed_c += turn_value * TURN_SCALAR;
@@ -90,10 +97,10 @@ public class RobotMove {
 
         // account for any power overshooting
         if ((power * MAX_MOTOR_POWER + Math.abs(turn_value)) > MAX_MOTOR_POWER) {
-            speed_a /= (power + turn_value);
-            speed_b /= (power + turn_value);
-            speed_c /= (power + turn_value);
-            speed_d /= (power + turn_value);
+            speed_a /= (power + Math.abs(turn_value));
+            speed_b /= (power + Math.abs(turn_value));
+            speed_c /= (power + Math.abs(turn_value));
+            speed_d /= (power + Math.abs(turn_value));
         }
 
         // set motor speeds
@@ -104,13 +111,13 @@ public class RobotMove {
     }
 
     // the same as robot centric movement except controls work relative to the field instead of the robot
-    public void fieldCentricMovement(double theta, double power, double turn_value) {
+    public void fieldCentricMovement(double x, double y, double turn_value) {
         // get orientation of the robot relative to the field using IMU
         Orientation currentOrientation = getIMUOrientation();
         double deltaAngle = currentOrientation.firstAngle - defaultOrientation.firstAngle;
 
         // do movement with new angle
-        robotCentricMovement(theta - deltaAngle, power, turn_value);
+        robotCentricMovement(x, y, deltaAngle, turn_value);
     }
 
     public void setDefaultOrientation() {
@@ -119,11 +126,7 @@ public class RobotMove {
 
     // gets the current orientation of the robot
     private Orientation getIMUOrientation() {
-        if (imu == null) {
-            System.out.println("Null IMU");
-            return new Orientation();
-        }
-        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+        return bhi260.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
     }
 }
 

@@ -32,20 +32,16 @@ public class Main extends OpMode {
 
     private void doMovement() {
         double leftStickX = controllerInput.getLeftStickX();
-        double leftStickY = -controllerInput.getLeftStickY();    // also negate the sign
+        double leftStickY = controllerInput.getLeftStickY();    // also negate the sign
         double rightStickX = controllerInput.getRightStickX();
 
-        double theta = Math.atan2(leftStickY, leftStickX);
-        double power = Math.sqrt(leftStickX*leftStickX + leftStickY*leftStickY);
-
-        telemetry.addData("Theta:\t", theta);
-        telemetry.addData("Power:\t", power);
-        telemetry.addData("Turn value:\t", rightStickX);
+        telemetry.addData("Left stick x\t", leftStickX);
+        telemetry.addData("Left stick y\t", leftStickY);
 
         if (settings.fieldCentricMovement.onMode) {
-            robotMove.fieldCentricMovement(theta, power, rightStickX);
+            robotMove.fieldCentricMovement(leftStickX, leftStickY, rightStickX);
         } else {
-            robotMove.robotCentricMovement(theta, power, rightStickX);
+            robotMove.robotCentricMovement(leftStickX, leftStickY, 0, rightStickX);
         }
     }
 }

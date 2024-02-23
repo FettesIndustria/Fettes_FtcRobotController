@@ -7,7 +7,6 @@ public class SettingsManager {
     public ControllerInputHandler controllerInput;
     public Gamepad gamepad;
     public Telemetry telemetry;
-
     public RobotMove robotMove;
 
     public Button settingsButton, robotCentricMovement, fieldCentricMovement, orientationButton;
@@ -40,28 +39,28 @@ public class SettingsManager {
 
     private void printSettings() {
         telemetry.clearAll();
-        telemetry.addData("settings", "Options:");
-        telemetry.addData("settings", "Press Square to toggle the movement mode");
-        telemetry.addData("settings", "Press Cross to set a new default orientation");
-        telemetry.addData("settings", "Press ");
-        telemetry.addData("settings", "\n");
+        telemetry.addData("", "Options:");
+        telemetry.addData("", "Press Square to toggle the movement mode");
+        telemetry.addData("", "Press Cross to set a new default orientation");
+        telemetry.addData("", "Press ");
+        telemetry.addData("", "\n");
     }
 
     public void changeSettings() {
         if (checkButton(fieldCentricMovement)) {
             // toggle movement mode
-            telemetry.addData("movement", "Switched to Field Centric Movement");
+            telemetry.addData("", "Switched to Field Centric Movement");
         }
 
         if (checkButton(robotCentricMovement)) {
             // toggle movement mode
-            telemetry.addData("movement", "Switched to Robot Centric Movement");
+            telemetry.addData("", "Switched to Robot Centric Movement");
         }
 
         if (checkButton(orientationButton)) {
             // set new default orientation
             robotMove.setDefaultOrientation();
-            telemetry.addData("orientation", "Set new default orientation");
+            telemetry.addData("", "Set new default orientation");
         }
     }
 
