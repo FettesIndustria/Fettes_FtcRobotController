@@ -12,7 +12,7 @@ public class RobotMove {
     private static final double MAX_AVAILABLE_POWER = 0.98;   // 2% reduction in max power
     private static final double MAX_MOTOR_POWER = 0.9 * MAX_AVAILABLE_POWER;   // don't use all available power (too sensitive)
     private static final double TURN_SCALAR = 0.6;    // turning scalar (can be adjusted)
-    private BHI260IMU bhi260; // Assuming BHI260IMU is the IMU class
+    private BHI260IMU bhi260; // Assuming BHI260IMU is the IMU class8
     private Orientation defaultOrientation;
 
     public RobotMove(HardwareMap hardwareMap) {
