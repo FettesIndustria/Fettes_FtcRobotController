@@ -5,9 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class RobotMove {
@@ -15,7 +12,7 @@ public class RobotMove {
     private static final double MAX_AVAILABLE_POWER = 0.98;   // 2% reduction in max power
     private static final double MAX_MOTOR_POWER = 0.9 * MAX_AVAILABLE_POWER;   // don't use all available power (too sensitive)
     private static final double TURN_SCALAR = 0.6;    // turning scalar (can be adjusted)
-    private final BHI260IMU bhi260; // Assuming BHI260IMU is the IMU class
+    private BHI260IMU bhi260; // Assuming BHI260IMU is the IMU class
     private Orientation defaultOrientation;
 
     public RobotMove(HardwareMap hardwareMap) {
@@ -28,7 +25,7 @@ public class RobotMove {
         defaultOrientation = getIMUOrientation(); // Initialize defaultOrientation
 
         // Initialize IMU
-        bhi260 = new BHI260IMU(hardwareMap.i2cDeviceSynch.get("imu"), true);
+        //bhi260 = new BHI260IMU(hardwareMap.i2cDeviceSynch.get("imu"), true);
     }
 
     private void initializeMotors() {
@@ -126,7 +123,8 @@ public class RobotMove {
 
     // gets the current orientation of the robot
     private Orientation getIMUOrientation() {
-        return bhi260.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+        //return bhi260.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+        return new Orientation();
     }
 }
 

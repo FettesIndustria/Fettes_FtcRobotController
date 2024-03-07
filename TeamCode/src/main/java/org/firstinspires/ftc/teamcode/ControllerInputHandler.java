@@ -39,6 +39,14 @@ public class ControllerInputHandler {
                 return gamepad.circle;
             case "triangle":
                 return gamepad.triangle;
+            case "dpadleft":
+                return gamepad.dpad_left;
+            case "dpadright":
+                return gamepad.dpad_right;
+            case "dpadup":
+                return gamepad.dpad_up;
+            case "dpaddown":
+                return gamepad.dpad_down;
             default:
                 return false;
         }

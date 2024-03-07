@@ -9,7 +9,7 @@ public class SettingsManager {
     public Telemetry telemetry;
     public RobotMove robotMove;
 
-    public Button settingsButton, robotCentricMovement, fieldCentricMovement, orientationButton;
+    public Button settingsButton, robotCentricMovement, fieldCentricMovement, orientationButton, brushButton, handButton;
 
     public SettingsManager(Gamepad gamepad, RobotMove robotMove, Telemetry telemetry) {
         this.gamepad = gamepad;
@@ -22,10 +22,12 @@ public class SettingsManager {
         robotCentricMovement = new Button("square", true);
         fieldCentricMovement = new Button("square", false);
         orientationButton = new Button("cross", false);
+        brushButton = new Button("dpadright", false);
+        handButton = new Button("triangle", false);
     }
 
     // checks for a button toggle and returns whether or not the button mode has toggled (pressed)
-    private boolean checkButton(Button button) {
+    public boolean checkButton(Button button) {
         boolean hasToggled = false;
         boolean pressed = controllerInput.isButtonPressed(button.buttonType);
         if (!button.isPressed && pressed) {
