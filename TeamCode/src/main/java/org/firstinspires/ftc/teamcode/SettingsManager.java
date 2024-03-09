@@ -27,25 +27,28 @@ public class SettingsManager {
         telemetry.addData("", "Options:");
         telemetry.addData("", "Press Square to toggle the movement mode");
         telemetry.addData("", "Press Cross to set a new default orientation");
-        telemetry.addData("", "Press ");
         telemetry.addData("", "\n");
     }
 
     public void doSettings() {
-        if (controllerInput.updateButton(robotMove.fieldCentricMovement)) {
+        if (controllerInput.updateButton(robotMove.fieldCentricMovement) && robotMove.fieldCentricMovement.onMode) {
             // toggle movement mode
-            telemetry.addData("", "Switched to Field Centric Movement");
+            telemetry.clearAll();
+            telemetry.addData("", "Switched t" +
+                    "o Field Centric Movement");
         }
 
-        if (controllerInput.updateButton(robotMove.robotCentricMovement)) {
+        if (controllerInput.updateButton(robotMove.robotCentricMovement) && robotMove.robotCentricMovement.onMode) {
             // toggle movement mode
+            telemetry.clearAll();
             telemetry.addData("", "Switched to Robot Centric Movement");
         }
 
         if (controllerInput.updateButton(robotMove.orientationButton)) {
             // set new default orientation
             robotMove.setDefaultOrientation();
-            telemetry.addData("", "Set new default orientation");
+            telemetry.clearAll();
+            telemetry.addData("", "New default orientation set");
         }
     }
 }

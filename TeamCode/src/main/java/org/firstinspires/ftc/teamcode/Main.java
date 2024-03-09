@@ -38,6 +38,7 @@ public class Main extends OpMode {
                 settings.printSettings();
             } else {
                 // exited settings mode
+                telemetry.clearAll();
             }
         }
     }

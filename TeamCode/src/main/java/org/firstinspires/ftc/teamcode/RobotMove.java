@@ -1,11 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class RobotMove {
@@ -13,7 +18,7 @@ public class RobotMove {
     private static final double MAX_AVAILABLE_POWER = 0.98;   // 2% reduction in max power
     private static final double MAX_MOTOR_POWER = 0.9 * MAX_AVAILABLE_POWER;   // don't use all available power (too sensitive)
     private static final double TURN_SCALAR = 0.6;    // turning scalar (can be adjusted)
-    private BHI260IMU bhi260; // Assuming BHI260IMU is the IMU class8
+    private BHI260IMU bhi260; // Using the BHI260IMU sensor on the control hub
     private Orientation defaultOrientation;
     private ControllerInputHandler controllerInput;
     private Gamepad gamepad;
@@ -31,14 +36,22 @@ public class RobotMove {
         fieldCentricMovement = new Button("square", false);
         orientationButton = new Button("cross", false);
 
-        initializeMotors();
-        defaultOrientation = getIMUOrientation(); // Initialize defaultOrientation
+        initialiseMotors();
 
-        // Initialize IMU
-        //bhi260 = new BHI260IMU(hardwareMap.i2cDeviceSynch.get("imu"), true);
+        bhi260 = hardwareMap.get(BHI260IMU.class, "imu");
+        bhi260.initialize(
+                new IMU.Parameters(
+                        new RevHubOrientationOnRobot(
+                                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+                        )
+                )
+        );
+
+        defaultOrientation = getIMUOrientation(); // Initialize defaultOrientation
     }
 
-    private void initializeMotors() {
+    private void initialiseMotors() {
         motorA.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorA.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -132,8 +145,7 @@ public class RobotMove {
 
     // gets the current orientation of the robot
     public Orientation getIMUOrientation() {
-        //return bhi260.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
-        return new Orientation();
+        return bhi260.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
     }
 
     public void doRobotMovement() {
