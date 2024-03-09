@@ -23,12 +23,16 @@ public class RobotMove {
     private ControllerInputHandler controllerInput;
     private Gamepad gamepad;
     public Button robotCentricMovement, fieldCentricMovement, orientationButton;
+    private Orientation autoCorrectOrientation;
+    private boolean isTurning;
+    private static final double AUTO_CORRECT_SENSITIVITY = 1.8;
 
     public RobotMove(HardwareMap hardwareMap, Gamepad gamepad) {
         motorA = hardwareMap.get(DcMotor.class, "motorA");
         motorB = hardwareMap.get(DcMotor.class, "motorB");
         motorC = hardwareMap.get(DcMotor.class, "motorC");
         motorD = hardwareMap.get(DcMotor.class, "motorD");
+        bhi260 = hardwareMap.get(BHI260IMU.class, "imu");
         this.gamepad = gamepad;
 
         controllerInput = new ControllerInputHandler(gamepad);
@@ -37,18 +41,11 @@ public class RobotMove {
         orientationButton = new Button("cross", false);
 
         initialiseMotors();
-
-        bhi260 = hardwareMap.get(BHI260IMU.class, "imu");
-        bhi260.initialize(
-                new IMU.Parameters(
-                        new RevHubOrientationOnRobot(
-                                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
-                        )
-                )
-        );
+        initialiseIMU();
 
         defaultOrientation = getIMUOrientation(); // Initialize defaultOrientation
+        autoCorrectOrientation = getIMUOrientation();
+        isTurning = true;   // initialise to true so that auto-correct turning can start immediately
     }
 
     private void initialiseMotors() {
@@ -63,6 +60,17 @@ public class RobotMove {
 
         motorD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorD.setDirection(DcMotorSimple.Direction.FORWARD);
+    }
+
+    private void initialiseIMU() {
+        bhi260.initialize(
+                new IMU.Parameters(
+                        new RevHubOrientationOnRobot(
+                                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+                        )
+                )
+        );
     }
 
     // gives power to any wheel motor
@@ -107,6 +115,21 @@ public class RobotMove {
         double speed_b = power * sin/max * MAX_MOTOR_POWER;
         double speed_c = power * sin/max * MAX_MOTOR_POWER;
         double speed_d = power * cos/max * MAX_MOTOR_POWER;
+
+        // add auto-correct turning
+        if (isTurning && turn_value == 0) {
+            autoCorrectOrientation = getIMUOrientation();
+        }
+        isTurning = turn_value != 0;
+
+        if (isTurning == false) {
+            // get orientation of the robot relative to its movement direction using IMU
+            Orientation currentOrientation = getIMUOrientation();
+            double deltaAngle = currentOrientation.firstAngle - autoCorrectOrientation.firstAngle;
+
+            // auto adjust for being off using turning
+            turn_value = deltaAngle * AUTO_CORRECT_SENSITIVITY / TURN_SCALAR;
+        }
 
         // add turning
         speed_a += turn_value * TURN_SCALAR;
