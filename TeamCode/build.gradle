@@ -25,5 +25,6 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
+    implementation files('src\\main\\java\\org\\firstinspires\\ftc\\teamcode\\opencv-2413.jar')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 }
