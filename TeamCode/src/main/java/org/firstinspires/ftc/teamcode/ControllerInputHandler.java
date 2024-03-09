@@ -12,21 +12,6 @@ public class ControllerInputHandler {
     }
 
     // buttons
-    public boolean isButtonPressed(char buttonName) {
-        switch (buttonName) {
-            case 'a':
-                return gamepad.a;
-            case 'b':
-                return gamepad.b;
-            case 'x':
-                return gamepad.x;
-            case 'y':
-                return gamepad.y;
-            default:
-                return false;
-        }
-    }
-
     public boolean isButtonPressed(String buttonName) {
         switch (buttonName) {
             case "options":
@@ -47,9 +32,49 @@ public class ControllerInputHandler {
                 return gamepad.dpad_up;
             case "dpaddown":
                 return gamepad.dpad_down;
+            case "lefttrigger":
+                return gamepad.left_trigger > 0;
+            case "righttrigger":
+                return gamepad.right_trigger > 0;
+            case "leftbumper":
+                return gamepad.left_bumper;
+            case "rightbumper":
+                return gamepad.right_bumper;
+            case "leftstickbutton":
+                return gamepad.left_stick_button;
+            case "rightstickbutton":
+                return gamepad.right_stick_button;
             default:
                 return false;
         }
+    }
+
+    public boolean dpad(String direction) {
+        switch (direction) {
+            case "up":
+                return gamepad.dpad_up;
+            case "down":
+                return gamepad.dpad_down;
+            case "left":
+                return gamepad.dpad_left;
+            case "right":
+                return gamepad.dpad_right;
+            default:
+                return false;
+        }
+    }
+
+    // checks for a button toggle and returns whether or not the button mode has toggled (pressed)
+    public boolean updateButton(Button button) {
+        boolean hasToggled = false;
+        boolean pressed = isButtonPressed(button.buttonType);
+        if (!button.isPressed && pressed) {
+            // toggle mode
+            button.onMode = !button.onMode;
+            hasToggled = true;
+        }
+        button.isPressed = pressed;
+        return hasToggled;
     }
 
 
@@ -86,21 +111,6 @@ public class ControllerInputHandler {
 
     public boolean rightBumper() {
         return gamepad.right_bumper;
-    }
-
-    public boolean dpad(String direction) {
-        switch (direction) {
-            case "up":
-                return gamepad.dpad_up;
-            case "down":
-                return gamepad.dpad_down;
-            case "left":
-                return gamepad.dpad_left;
-            case "right":
-                return gamepad.dpad_right;
-            default:
-                return false;
-        }
     }
 }
 

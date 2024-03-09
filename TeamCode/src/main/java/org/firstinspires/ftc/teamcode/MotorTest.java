@@ -12,11 +12,11 @@ public class MotorTest extends OpMode {
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
-        robotMove = new RobotMove(hardwareMap);
+        robotMove = new RobotMove(hardwareMap, gamepad1);
     }
     @Override
     public void loop() {
-        char[] buttons = {'a', 'b', 'x', 'y'};
+        String[] buttons = {"cross", "circle", "triangle", "square"};
         char[] motors = {'A', 'B', 'C', 'D'};
 
         for (int i = 0; i < 4; i++) {

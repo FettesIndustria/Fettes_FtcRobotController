@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Main", group = "TeleOp")
 public class Main extends OpMode {
-
     private ControllerInputHandler controllerInput;
     private RobotMove robotMove;
     private SettingsManager settings;
@@ -13,40 +12,33 @@ public class Main extends OpMode {
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
-        robotMove = new RobotMove(hardwareMap);
+        robotMove = new RobotMove(hardwareMap, gamepad1);
         settings = new SettingsManager(gamepad1, robotMove, telemetry);
-        robotArm = new RobotArm(hardwareMap);
+        robotArm = new RobotArm(hardwareMap, gamepad1);
     }
 
     @Override
     public void loop() {
-        settings.checkSettingsButton();
-        settings.checkButton(settings.brushButton);
-        settings.checkButton(settings.handButton);
+        manageButtons();
 
         if (settings.settingsButton.onMode) {
-            settings.changeSettings();
+            settings.doSettings();
         } else {
-            doMovement();
+            robotMove.doRobotMovement();
+            robotArm.doArmMovement();
         }
         telemetry.update();
     }
 
-    private void doMovement() {
-        double leftStickX = controllerInput.getLeftStickX();
-        double leftStickY = controllerInput.getLeftStickY();    // also negate the sign
-        double rightStickX = controllerInput.getRightStickX();
-
-        telemetry.addData("Left stick x\t", leftStickX);
-        telemetry.addData("Left stick y\t", leftStickY);
-
-        robotArm.toggleBrush(settings.brushButton.onMode);
-        robotArm.toggleHand(settings.handButton.onMode);
-
-        if (settings.fieldCentricMovement.onMode) {
-            robotMove.fieldCentricMovement(leftStickX, leftStickY, rightStickX);
-        } else {
-            robotMove.robotCentricMovement(leftStickX, leftStickY, 0, rightStickX);
+    private void manageButtons() {
+        // check settings button
+        if (controllerInput.updateButton(settings.settingsButton)) {
+            if (settings.settingsButton.onMode) {
+                // in settings, print commands
+                settings.printSettings();
+            } else {
+                // exited settings mode
+            }
         }
     }
 }

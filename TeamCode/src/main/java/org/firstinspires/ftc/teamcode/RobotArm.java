@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -9,40 +10,60 @@ public class RobotArm {
 
     private DcMotor motorArm, motorBrush;
     private Servo servoArm, servoHand;
-    private static final double MAX_ARM_POWER = 0.4;
-    private static final double MAX_HAND_POWER = 0.5;
-
+    private Gamepad gamepad;
+    private ControllerInputHandler controllerInput;
+    private static final double ARM_POWER = 0.3;
     private static final double BRUSH_POWER = 0.5;
+    private static final double HAND_ANGLE_INCREMENT = 0.075;
+    public Button brushButton, handButton, handReleaseButton, motorArmUpButton, motorArmDownButton;
 
-    public RobotArm(HardwareMap hardwareMap) {
+    public double handAngle;
+
+    public RobotArm(HardwareMap hardwareMap, Gamepad gamepad) {
         motorArm = hardwareMap.get(DcMotor.class, "motorArm");
         motorBrush = hardwareMap.get(DcMotor.class, "motorBrush");
-        //servoArm = hardwareMap.get(Servo.class, "servoArm");
+        servoArm = hardwareMap.get(Servo.class, "servoArm");
         servoHand = hardwareMap.get(Servo.class, "servoHand");
+        this.gamepad = gamepad;
+
+        controllerInput = new ControllerInputHandler(gamepad);
+        brushButton = new Button("leftstickbutton", false);
+        handButton = new Button("triangle", false);
+        handReleaseButton = new Button("circle", false);
+        motorArmUpButton = new Button("leftbumper", false);
+        motorArmDownButton = new Button("rightbumper", false);
+        handAngle = 0.0;
+
         initialiseMotors();
     }
 
     private void initialiseMotors() {
         motorArm.setDirection(DcMotorSimple.Direction.FORWARD);
         motorBrush.setDirection(DcMotorSimple.Direction.REVERSE);
-        //servoArm.setDirection(Servo.Direction.FORWARD);
+        servoArm.setDirection(Servo.Direction.FORWARD);
         servoHand.setDirection(Servo.Direction.FORWARD);
+        servoHand.setPosition(0);
+        servoArm.setPosition(0);
     }
 
-    public void armMove(double power) {
-        //motorArm.setPower(power * MAX_ARM_POWER);
-    }
+    public void doArmMovement() {
+        // update arm buttons
+        controllerInput.updateButton(brushButton);
+        controllerInput.updateButton(motorArmUpButton);
+        controllerInput.updateButton(motorArmDownButton);
 
-    public void toggleBrush(boolean mode) {
-        motorBrush.setPower(mode ? BRUSH_POWER : 0);
-    }
+        // hand buttons
+        if (controllerInput.updateButton(handButton)) {
+            handAngle += HAND_ANGLE_INCREMENT;
+            servoHand.setPosition(handAngle);
+        }
+        if (controllerInput.updateButton(handReleaseButton)) {
+            handAngle = 0.0;
+            servoHand.setPosition(0);
+        }
 
-    public void toggleHand(boolean mode) {
-        handMove(mode ? 30 : 0);
-    }
-
-    public void handMove(double pos) {
-        servoHand.setPosition(pos);
+        motorBrush.setPower(brushButton.onMode ? BRUSH_POWER : 0);
+        motorArm.setPower(motorArmUpButton.isPressed ? ARM_POWER : (motorArmDownButton.isPressed ? -ARM_POWER : 0));
     }
 }
 

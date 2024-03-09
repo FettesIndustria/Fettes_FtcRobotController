@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
@@ -14,12 +15,21 @@ public class RobotMove {
     private static final double TURN_SCALAR = 0.6;    // turning scalar (can be adjusted)
     private BHI260IMU bhi260; // Assuming BHI260IMU is the IMU class8
     private Orientation defaultOrientation;
+    private ControllerInputHandler controllerInput;
+    private Gamepad gamepad;
+    public Button robotCentricMovement, fieldCentricMovement, orientationButton;
 
-    public RobotMove(HardwareMap hardwareMap) {
+    public RobotMove(HardwareMap hardwareMap, Gamepad gamepad) {
         motorA = hardwareMap.get(DcMotor.class, "motorA");
         motorB = hardwareMap.get(DcMotor.class, "motorB");
         motorC = hardwareMap.get(DcMotor.class, "motorC");
         motorD = hardwareMap.get(DcMotor.class, "motorD");
+        this.gamepad = gamepad;
+
+        controllerInput = new ControllerInputHandler(gamepad);
+        robotCentricMovement = new Button("square", true);
+        fieldCentricMovement = new Button("square", false);
+        orientationButton = new Button("cross", false);
 
         initializeMotors();
         defaultOrientation = getIMUOrientation(); // Initialize defaultOrientation
@@ -86,7 +96,6 @@ public class RobotMove {
         double speed_d = power * cos/max * MAX_MOTOR_POWER;
 
         // add turning
-        if (y < 0) turn_value = -turn_value;
         speed_a += turn_value * TURN_SCALAR;
         speed_b -= turn_value * TURN_SCALAR;
         speed_c += turn_value * TURN_SCALAR;
@@ -122,9 +131,21 @@ public class RobotMove {
     }
 
     // gets the current orientation of the robot
-    private Orientation getIMUOrientation() {
+    public Orientation getIMUOrientation() {
         //return bhi260.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
         return new Orientation();
+    }
+
+    public void doRobotMovement() {
+        double leftStickX = controllerInput.getLeftStickX();
+        double leftStickY = controllerInput.getLeftStickY();    // also negate the sign
+        double rightStickX = controllerInput.getRightStickX();
+
+        if (fieldCentricMovement.onMode) {
+            fieldCentricMovement(leftStickX, leftStickY, rightStickX);
+        } else {
+            robotCentricMovement(leftStickX, leftStickY, 0, rightStickX);
+        }
     }
 }
 
