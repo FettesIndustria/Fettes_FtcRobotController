@@ -9,6 +9,7 @@ import org.opencv.highgui.VideoCapture;
 import org.opencv.objdetect.CascadeClassifier;
 
 import java.util.concurrent.TimeUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Autonomous", group = "TeleOp")
@@ -19,13 +20,12 @@ public class Autonomous extends OpMode {
     private volatile boolean running;
     private RobotMove robotMove;
     private RobotArm robotArm;
-
     private Gamepad gamepad;
     private boolean objectDetected;
-
     private static Boolean nearboard;
-
     private static Boolean isBlue;
+    private static final double TURN_DURATION = 1.0;
+    private static final double TWO_PI = 2 * Math.PI;
 
     public Autonomous() {
         // Load OpenCV library and initialize object detector
@@ -43,34 +43,55 @@ public class Autonomous extends OpMode {
         blue();
     }
 
+    private void moveRobotTime(double x, double y, double seconds) {
+        int totalTime = (int)(1000000 * seconds);
+        long startTime = System.nanoTime();
+        boolean finished = false;
+
+        while(!finished) {
+            robotMove.robotCentricMovement(x, y, 0, 0);
+            finished = (System.nanoTime() - startTime >= totalTime);
+        }
+    }
+
+    private void turnToOrientation(double targetAngle) {
+        int totalTime = (int)(1000000 * TURN_DURATION);
+        long startTime = System.nanoTime();
+        boolean finished = false;
+
+        robotMove.autoCorrectOrientation.firstAngle = (float)targetAngle;
+
+        while(!finished) {
+            // auto correct orientation to 90 degrees left facing board
+            robotMove.robotCentricMovement(0, 0, 0, 0);
+            finished = (System.nanoTime() - startTime >= totalTime);
+        }
+    }
+
 
     private void red()
     {
         boolean nearboard = true;
+        Orientation initialOrientation = robotMove.getIMUOrientation();
 
-        if(!nearboard)
-        {
-            int totalTime = (int)(1000000 * 1.5);
-            long startTime = System.nanoTime();
-            boolean finished = false;
+        if (nearboard) {
+            // move forward a little bit
 
-            while(!finished) {
-                robotMove.robotCentricMovement(-3 / Math.sqrt(13), 2 / Math.sqrt(13), 0, 0);
-                finished = (System.nanoTime() - startTime >= totalTime);
-            }
+            // move towards board and face it
+            moveRobotTime(-3 / Math.sqrt(13), 2 / Math.sqrt(13), 1.5);
+            turnToOrientation((initialOrientation.firstAngle + (float)Math.PI/2) % (float)TWO_PI);
 
-            totalTime = (int)(1000000 * 1.0);
-            startTime = System.nanoTime();
-            finished = false;
+            // move back a little bit
 
-            while(!finished) {
-                robotMove.robotCentricMovement(0, 0, 0, 0);
+            // place pixels on board
+
+        } else {
 
 
-                finished = (System.nanoTime() - startTime >= totalTime);
-            }
+            // place pixels on board
+
         }
-        else
+
         {
             //turn right pi/2
             //go for one block (0.66m)

@@ -23,9 +23,10 @@ public class RobotMove {
     private ControllerInputHandler controllerInput;
     private Gamepad gamepad;
     public Button robotCentricMovement, fieldCentricMovement, orientationButton;
-    private Orientation autoCorrectOrientation;
+    public Orientation autoCorrectOrientation;
     private boolean isTurning;
     private static final double AUTO_CORRECT_SENSITIVITY = 3.0;
+    private static final double TWO_PI = 2 * Math.PI;
 
     public RobotMove(HardwareMap hardwareMap, Gamepad gamepad) {
         motorA = hardwareMap.get(DcMotor.class, "motorA");
@@ -128,7 +129,7 @@ public class RobotMove {
         if (isTurning == false) {
             // get orientation of the robot relative to its movement direction using IMU
             Orientation currentOrientation = getIMUOrientation();
-            double deltaAngle = currentOrientation.firstAngle - autoCorrectOrientation.firstAngle;
+            double deltaAngle = (currentOrientation.firstAngle - autoCorrectOrientation.firstAngle) % TWO_PI;
 
             // auto adjust for being off using turning
             turn_value = deltaAngle * AUTO_CORRECT_SENSITIVITY;
