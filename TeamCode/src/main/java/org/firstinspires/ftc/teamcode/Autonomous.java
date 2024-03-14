@@ -10,6 +10,7 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import java.util.concurrent.TimeUnit;
 
+
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Autonomous", group = "TeleOp")
 public class Autonomous extends OpMode {
 
@@ -21,6 +22,10 @@ public class Autonomous extends OpMode {
 
     private Gamepad gamepad;
     private boolean objectDetected;
+
+    private static Boolean nearboard;
+
+    private static Boolean isBlue;
 
     public Autonomous() {
         // Load OpenCV library and initialize object detector
@@ -34,6 +39,8 @@ public class Autonomous extends OpMode {
 
         // Assuming you've configured the motor in the robot configuration file
         startDetection();
+        red();
+        blue();
     }
 
 
@@ -41,12 +48,27 @@ public class Autonomous extends OpMode {
     {
         boolean nearboard = true;
 
-        if(nearboard)
+        if(!nearboard)
         {
-            robotMove.robotCentricMovement(0,0,0,90);
-            // turn facing north right arg(33.69)
-            // vector = sqrt(13)*0.66 meters
-            // put down pixel
+            int totalTime = (int)(1000000 * 1.5);
+            long startTime = System.nanoTime();
+            boolean finished = false;
+
+            while(!finished) {
+                robotMove.robotCentricMovement(-3 / Math.sqrt(13), 2 / Math.sqrt(13), 0, 0);
+                finished = (System.nanoTime() - startTime >= totalTime);
+            }
+
+            totalTime = (int)(1000000 * 1.0);
+            startTime = System.nanoTime();
+            finished = false;
+
+            while(!finished) {
+                robotMove.robotCentricMovement(0, 0, 0, 0);
+
+
+                finished = (System.nanoTime() - startTime >= totalTime);
+            }
         }
         else
         {
@@ -66,6 +88,10 @@ public class Autonomous extends OpMode {
             // turn facing north left arg(33.69)
             // vector = sqrt(13)*0.66 meters
             // put down pixel
+
+            // robot already in right orientation from beginning (facing east relative to boards)
+
+            robotMove.fieldCentricMovement(-3/Math.sqrt(13),2/Math.sqrt(13) , 0);
         }
         else
         {
