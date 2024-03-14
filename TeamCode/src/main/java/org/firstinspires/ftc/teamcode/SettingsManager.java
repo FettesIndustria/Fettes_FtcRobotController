@@ -34,8 +34,7 @@ public class SettingsManager {
         if (controllerInput.updateButton(robotMove.fieldCentricMovement) && robotMove.fieldCentricMovement.onMode) {
             // toggle movement mode
             telemetry.clearAll();
-            telemetry.addData("", "Switched t" +
-                    "o Field Centric Movement");
+            telemetry.addData("", "Switched to Field Centric Movement");
         }
 
         if (controllerInput.updateButton(robotMove.robotCentricMovement) && robotMove.robotCentricMovement.onMode) {

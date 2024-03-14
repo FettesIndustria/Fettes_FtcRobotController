@@ -25,7 +25,7 @@ public class RobotMove {
     public Button robotCentricMovement, fieldCentricMovement, orientationButton;
     private Orientation autoCorrectOrientation;
     private boolean isTurning;
-    private static final double AUTO_CORRECT_SENSITIVITY = 1.8;
+    private static final double AUTO_CORRECT_SENSITIVITY = 3.0;
 
     public RobotMove(HardwareMap hardwareMap, Gamepad gamepad) {
         motorA = hardwareMap.get(DcMotor.class, "motorA");
@@ -117,6 +117,9 @@ public class RobotMove {
         double speed_d = power * cos/max * MAX_MOTOR_POWER;
 
         // add auto-correct turning
+        // there is some error occurring here
+        // robot keeps turning for some reason after turn_value is set to zero
+        // perhaps the auto-correct orientation isn't being set when it should be
         if (isTurning && turn_value == 0) {
             autoCorrectOrientation = getIMUOrientation();
         }
@@ -128,7 +131,7 @@ public class RobotMove {
             double deltaAngle = currentOrientation.firstAngle - autoCorrectOrientation.firstAngle;
 
             // auto adjust for being off using turning
-            turn_value = deltaAngle * AUTO_CORRECT_SENSITIVITY / TURN_SCALAR;
+            turn_value = deltaAngle * AUTO_CORRECT_SENSITIVITY;
         }
 
         // add turning
