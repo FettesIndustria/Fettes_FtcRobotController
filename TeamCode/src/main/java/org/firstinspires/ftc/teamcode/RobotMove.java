@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class RobotMove {
     private final DcMotor motorA, motorB, motorC, motorD;
+    private Servo servoDrone;
     private static final double MAX_AVAILABLE_POWER = 0.98;   // 2% reduction in max power
     private static final double MAX_MOTOR_POWER = 0.9 * MAX_AVAILABLE_POWER;   // don't use all available power (too sensitive)
     private static final double TURN_SCALAR = 0.6;    // turning scalar (can be adjusted)
@@ -46,6 +48,7 @@ public class RobotMove {
 
         initialiseMotors();
         initialiseIMU();
+        //servoDrone = hardwareMap.get(Servo.class, "servoDrone");
 
         defaultOrientation = getIMUOrientation(); // Initialize defaultOrientation
         autoCorrectOrientation = getIMUOrientation();

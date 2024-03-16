@@ -2,97 +2,110 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.objdetect.CascadeClassifier;
-import org.opencv.videoio.VideoCapture;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Autonomous", group = "TeleOp")
 public class Autonomous extends OpMode {
-
-    private CascadeClassifier objectDetector;
-    private VideoCapture camera;
+    //private CascadeClassifier objectDetector;
+    //private VideoCapture camera;
     private RobotMove robotMove;
     private RobotArm robotArm;
     private Gamepad gamepad;
+    private RobotProcesses robotProcesses;
     private boolean objectDetected;
     private static boolean nearboard;
     private static boolean isBlue;
     private static final double TURN_DURATION = 1.0;
     private static final double TWO_PI = 2 * Math.PI;
+    private Servo servoPixel;
+    private static final double CLOSED_POSITION = 0.0;
 
     public Autonomous() {
         // Load OpenCV library and initialize object detector
-        System.load("TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opencv_java2413.dll");
-        this.objectDetector = new CascadeClassifier("TeamCode/src/main/java/org/firstinspires/ftc/teamcode/cascade.xml");
+        //System.load("TeamCode/src/main/java/org/firstinspires/ftc/teamcode/opencv_java2413.dll");
+        /*this.objectDetector = new CascadeClassifier("TeamCode/src/main/java/org/firstinspires/ftc/teamcode/cascade.xml");
         this.camera = new VideoCapture(0);
         nearboard = true;
         if (!camera.isOpened()) {
             System.out.println("Error: Camera not opened.");
             return;
-        }
+        }*/
 
         // Assuming you've configured the motor in the robot configuration file
         red();
         //blue();
     }
 
-    private void moveRobotTime(double x, double y, double seconds) {
-        int totalTime = (int) (1000000 * seconds);
-        long startTime = System.nanoTime();
-        boolean finished = false;
-
-        while (!finished) {
-            robotMove.robotCentricMovement(x, y, 0, 0);
-            finished = (System.nanoTime() - startTime >= totalTime);
-        }
+    @Override
+    public void init() {
+        robotMove = new RobotMove(hardwareMap, gamepad, telemetry);
+        robotArm = new RobotArm(hardwareMap, gamepad);
+        robotProcesses = new RobotProcesses(robotMove, robotArm);
+        servoPixel = hardwareMap.get(Servo.class, "servoPixel");
     }
 
-    private void turnToOrientation(double targetAngle, double duration) {
-        int totalTime = (int) (1000000 * duration);
-        long startTime = System.nanoTime();
-        boolean finished = false;
-
-        robotMove.autoCorrectOrientation.firstAngle = (float) targetAngle;
-
-        while (!finished) {
-            // auto correct orientation to 90 degrees left facing board
-            robotMove.robotCentricMovement(0, 0, 0, 0);
-            finished = (System.nanoTime() - startTime >= totalTime);
+    private double turnCheckPixel(Orientation initialOrientation) {
+        // turn left
+        for (int i = 0; i < 5; i++) {
+            //if (detectFrame()) return robotMove.getIMUOrientation().firstAngle - initialOrientation.firstAngle;
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle + Math.PI / 100, 1/5.0);
         }
+
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle, 0.5);
+
+        // turn right
+        for (int i = 0; i < 5; i++) {
+            //if (detectFrame()) return robotMove.getIMUOrientation().firstAngle - initialOrientation.firstAngle;
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI / 100, 1/5.0);
+        }
+
+        return 0;
     }
 
+    private void placePixel() {
+        servoPixel.setPosition(CLOSED_POSITION);
+    }
 
     private void red() {
         Orientation initialOrientation = robotMove.getIMUOrientation();
 
         if (nearboard) {
             // move forward a little bit
-            moveRobotTime(0, 1, 0.2);
+            robotProcesses.moveRobotTime(0, 1, 0.2);
 
-            // turn left
-            for (int i = 0; i < 5; i++) {
-                if (detectFrame()) break;
-                turnToOrientation(initialOrientation.firstAngle + Math.PI / 100, 1/5.0);
-            }
+            double deltaAngle = turnCheckPixel(initialOrientation);
 
-            turnToOrientation(initialOrientation.firstAngle, 0.5);
-
-            // turn right
-            for (int i = 0; i < 5; i++) {
-                if (detectFrame()) break;
-                turnToOrientation(initialOrientation.firstAngle - Math.PI / 100, 1/5.0);
+            if (deltaAngle > Math.PI/18) {
+                // on left
+                robotProcesses.moveRobotTime(0, 0.6, 0.3);
+                // place pixel
+                placePixel();
+                robotProcesses.moveRobotTime(0, -0.6, 0.3);
+            } else if (deltaAngle < -Math.PI/18) {
+                // on right
+                robotProcesses.moveRobotTime(0, 0.6, 0.3);
+                robotProcesses.turnToOrientation(initialOrientation.firstAngle + Math.PI, 1.5);
+                // place pixel
+                placePixel();
+                robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1.5);
+                robotProcesses.moveRobotTime(0, -0.6, 0.3);
+            } else {
+                // in middle
+                robotProcesses.moveRobotTime(0, 0.6, 0.3);
+                robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI/2, 1);
+                // place pixel
+                placePixel();
+                robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1);
+                robotProcesses.moveRobotTime(0, -0.6, 0.3);
             }
 
             // move towards board and face it
-            moveRobotTime(-3 / Math.sqrt(13), 2 / Math.sqrt(13), 1.5);
-            turnToOrientation((initialOrientation.firstAngle + (float) Math.PI / 2) % (float) TWO_PI, TURN_DURATION);
+            robotProcesses.moveRobotTime(-3 / Math.sqrt(13), 2 / Math.sqrt(13), 1.5);
+            robotProcesses.turnToOrientation((initialOrientation.firstAngle + (float) Math.PI / 2) % (float) TWO_PI, TURN_DURATION);
 
             // move back a little bit
 
@@ -134,7 +147,7 @@ public class Autonomous extends OpMode {
         }
     }
 
-    private boolean detectFrame() {
+    /*private boolean detectFrame() {
         final AtomicBoolean detectionResult = new AtomicBoolean(false);
 
         new Thread(() -> {
@@ -164,16 +177,7 @@ public class Autonomous extends OpMode {
 
         }).start();
         return detectionResult.get();
-    }
-
-    @Override
-    public void init() {
-        robotMove = new RobotMove(hardwareMap, gamepad, telemetry);
-        robotArm = new RobotArm(hardwareMap, gamepad);
-
-
-
-    }
+    }*/
 
     @Override
     public void loop() {

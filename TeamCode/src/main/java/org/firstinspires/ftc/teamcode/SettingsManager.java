@@ -8,7 +8,6 @@ public class SettingsManager {
     public Gamepad gamepad;
     public Telemetry telemetry;
     public RobotMove robotMove;
-
     public Button settingsButton;
 
     public SettingsManager(Gamepad gamepad, RobotMove robotMove, Telemetry telemetry) {

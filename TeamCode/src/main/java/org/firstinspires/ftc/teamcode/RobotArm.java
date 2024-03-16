@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class RobotArm {
-
     private DcMotor motorArm, motorBrush;
     private Servo servoArm, servoHand;
     private Gamepad gamepad;
@@ -42,8 +41,8 @@ public class RobotArm {
         motorBrush.setDirection(DcMotorSimple.Direction.REVERSE);
         servoArm.setDirection(Servo.Direction.FORWARD);
         servoHand.setDirection(Servo.Direction.FORWARD);
-        servoHand.setPosition(0);
-        servoArm.setPosition(0);
+        servoHand.setPosition(CLOSED_POSITION);
+        servoArm.setPosition(CLOSED_POSITION);
     }
 
     public void doArmMovement() {
