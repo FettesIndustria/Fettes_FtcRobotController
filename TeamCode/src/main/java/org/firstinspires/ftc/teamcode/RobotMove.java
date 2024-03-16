@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -22,19 +23,21 @@ public class RobotMove {
     private Orientation defaultOrientation;
     private ControllerInputHandler controllerInput;
     private Gamepad gamepad;
+    private Telemetry telemetry;
     public Button robotCentricMovement, fieldCentricMovement, orientationButton;
     public Orientation autoCorrectOrientation;
     private boolean isTurning;
     private static final double AUTO_CORRECT_SENSITIVITY = 3.0;
     private static final double TWO_PI = 2 * Math.PI;
 
-    public RobotMove(HardwareMap hardwareMap, Gamepad gamepad) {
+    public RobotMove(HardwareMap hardwareMap, Gamepad gamepad, Telemetry telemetry) {
         motorA = hardwareMap.get(DcMotor.class, "motorA");
         motorB = hardwareMap.get(DcMotor.class, "motorB");
         motorC = hardwareMap.get(DcMotor.class, "motorC");
         motorD = hardwareMap.get(DcMotor.class, "motorD");
         bhi260 = hardwareMap.get(BHI260IMU.class, "imu");
         this.gamepad = gamepad;
+        this.telemetry = telemetry;
 
         controllerInput = new ControllerInputHandler(gamepad);
         robotCentricMovement = new Button("square", true);
@@ -130,6 +133,8 @@ public class RobotMove {
             // get orientation of the robot relative to its movement direction using IMU
             Orientation currentOrientation = getIMUOrientation();
             double deltaAngle = (currentOrientation.firstAngle - autoCorrectOrientation.firstAngle) % TWO_PI;
+            telemetry.addData("IMU Angle: ", getIMUOrientation().firstAngle);
+            telemetry.addData("Delta Angle: ", deltaAngle);
 
             // auto adjust for being off using turning
             turn_value = deltaAngle * AUTO_CORRECT_SENSITIVITY;

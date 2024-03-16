@@ -15,8 +15,8 @@ public class RobotArm {
     private static final double ARM_POWER = 0.3;
     private static final double BRUSH_POWER = 0.5;
     private static final double HAND_ANGLE_INCREMENT = 0.075;
+    private static final double CLOSED_POSITION = 0.0;
     public Button brushButton, handButton, handReleaseButton, motorArmUpButton, motorArmDownButton;
-
     public double handAngle;
 
     public RobotArm(HardwareMap hardwareMap, Gamepad gamepad) {
@@ -58,8 +58,8 @@ public class RobotArm {
             servoHand.setPosition(handAngle);
         }
         if (controllerInput.updateButton(handReleaseButton)) {
-            handAngle = 0.0;
-            servoHand.setPosition(0);
+            handAngle = CLOSED_POSITION;
+            servoHand.setPosition(handAngle);
         }
 
         motorBrush.setPower(brushButton.onMode ? BRUSH_POWER : 0);

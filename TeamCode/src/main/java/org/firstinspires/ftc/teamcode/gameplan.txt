@@ -1,0 +1,8 @@
+Start of the game:
+30 seconds in autonomous mode
+We initially place 2 pixels in the left servo + the right hand side of the pixel holder
+
+place left pixel on the ground using camera recognition
+then place the other pixel pixel on the board
+
+also try to get back to a position left of the

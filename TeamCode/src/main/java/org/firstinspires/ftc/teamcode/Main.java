@@ -12,7 +12,7 @@ public class Main extends OpMode {
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
-        robotMove = new RobotMove(hardwareMap, gamepad1);
+        robotMove = new RobotMove(hardwareMap, gamepad1, telemetry);
         settings = new SettingsManager(gamepad1, robotMove, telemetry);
         robotArm = new RobotArm(hardwareMap, gamepad1);
     }

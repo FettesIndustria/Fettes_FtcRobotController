@@ -12,7 +12,7 @@ public class MotorTest extends OpMode {
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
-        robotMove = new RobotMove(hardwareMap, gamepad1);
+        robotMove = new RobotMove(hardwareMap, gamepad1, telemetry);
     }
     @Override
     public void loop() {
