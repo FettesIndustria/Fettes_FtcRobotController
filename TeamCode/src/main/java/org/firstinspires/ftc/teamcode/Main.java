@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Main", group = "TeleOp")
+@TeleOp(name = "Main", group = "TeleOp")
 public class Main extends OpMode {
     private ControllerInputHandler controllerInput;
     private RobotMove robotMove;
@@ -14,7 +15,7 @@ public class Main extends OpMode {
         controllerInput = new ControllerInputHandler(gamepad1);
         robotMove = new RobotMove(hardwareMap, gamepad1, telemetry);
         settings = new SettingsManager(gamepad1, robotMove, telemetry);
-        robotArm = new RobotArm(hardwareMap, gamepad1);
+        robotArm = new RobotArm(hardwareMap, gamepad1, telemetry);
     }
 
     @Override

@@ -25,7 +25,7 @@ public class RobotMove {
     private Orientation defaultOrientation;
     private ControllerInputHandler controllerInput;
     private Gamepad gamepad;
-    private Telemetry telemetry;
+    public Telemetry telemetry;
     public Button robotCentricMovement, fieldCentricMovement, orientationButton;
     public Orientation autoCorrectOrientation;
     private boolean isTurning;
@@ -107,6 +107,12 @@ public class RobotMove {
         return Math.atan2(y, x);
     }
 
+    public double angleToRange(double angle) {
+        angle %= (Math.PI * 2);
+        if (angle >= Math.PI) return angle -= Math.PI * 2;
+        return angle;
+    }
+
     // sets the motors to move orthogonally at some angle and power value while turning with speed turn_value
     public void robotCentricMovement(double x, double y, double offset_angle, double turn_value) {
         double theta = xy_to_angle(x, y) - offset_angle;
@@ -135,12 +141,10 @@ public class RobotMove {
         if (isTurning == false) {
             // get orientation of the robot relative to its movement direction using IMU
             Orientation currentOrientation = getIMUOrientation();
-            double deltaAngle = (currentOrientation.firstAngle - autoCorrectOrientation.firstAngle) % TWO_PI;
-            telemetry.addData("IMU Angle: ", getIMUOrientation().firstAngle);
-            telemetry.addData("Delta Angle: ", deltaAngle);
+            double deltaAngle = currentOrientation.firstAngle - autoCorrectOrientation.firstAngle;
 
             // auto adjust for being off using turning
-            turn_value = deltaAngle * AUTO_CORRECT_SENSITIVITY;
+            turn_value = angleToRange(deltaAngle) * AUTO_CORRECT_SENSITIVITY;
         }
 
         // add turning

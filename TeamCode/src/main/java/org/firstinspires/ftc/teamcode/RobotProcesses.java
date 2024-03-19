@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-public class RobotProcesses {
+public class RobotProcesses extends Auto{
     private RobotMove robotMove;
     private RobotArm robotArm;
 
@@ -10,27 +10,43 @@ public class RobotProcesses {
     }
 
     public void moveRobotTime(double x, double y, double seconds) {
-        int totalTime = (int) (1000000 * seconds);
-        long startTime = System.nanoTime();
+
+        long totalTime = (long) (1000 * seconds);
+        long startTime = System.currentTimeMillis();
         boolean finished = false;
 
         while (!finished) {
             robotMove.robotCentricMovement(x, y, 0, 0);
-            finished = (System.nanoTime() - startTime >= totalTime);
+            finished = (System.currentTimeMillis() - startTime >= totalTime);
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                // Handle the interruption (e.g., log it or throw a new exception)
+                robotMove.robotCentricMovement(0, 0, 0, 0);
+            }
         }
     }
 
     public void turnToOrientation(double targetAngle, double duration) {
-        int totalTime = (int) (1000000 * duration);
-        long startTime = System.nanoTime();
+        long totalTime = (long) (1000 * duration);
+        long startTime = System.currentTimeMillis();
         boolean finished = false;
 
-        robotMove.autoCorrectOrientation.firstAngle = (float) targetAngle;
+        robotMove.autoCorrectOrientation.firstAngle = (float)robotMove.angleToRange(targetAngle);
 
         while (!finished) {
             // auto correct orientation to 90 degrees left facing board
             robotMove.robotCentricMovement(0, 0, 0, 0);
-            finished = (System.nanoTime() - startTime >= totalTime);
+            finished = (System.currentTimeMillis() - startTime >= totalTime);
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                // Handle the interruption (e.g., log it or throw a new exception)
+            }
         }
+
     }
+
 }
