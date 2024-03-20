@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -34,13 +35,38 @@ public class Auto1 extends LinearOpMode {
         robotArm = new RobotArm(hardwareMap, gamepad, telemetry);
         robotProcesses = new RobotProcesses(robotMove, robotArm);
         robotExtras = new RobotExtras(hardwareMap, gamepad, telemetry);
+        lowerArm();
 
         waitForStart();
 
-        //awayBoardModified("blue", "middle");
-        blueFront();
+        //runMode("red", "front", "left");
+        blueBackModified("left");
 
+    }
 
+    private void runMode(String colour, String position, String block) {
+        switch (colour) {
+            case "blue":
+                switch (position) {
+                    case "front":
+                        blueFront(block);
+                        break;
+                    case "back":
+                        blueBack(block);
+                        break;
+                }
+                break;
+            case "red":
+                switch (position) {
+                    case "front":
+                        redFront(block);
+                        break;
+                    case "back":
+                        redBack(block);
+                        break;
+                }
+                break;
+        }
     }
 
     private void placePixel() {
@@ -52,6 +78,29 @@ public class Auto1 extends LinearOpMode {
             //robotMove.robotCentricMovement(0, 0, 0, 0);
         }
         robotExtras.servoPixel.setPosition(robotExtras.SERVO_PIXEL_OPEN);
+
+        try {
+            TimeUnit.MILLISECONDS.sleep(780);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void placePixelMove(String block, Orientation initialOrientation) {
+        if (block == "left") {
+            telemetry.addData("On left", "");
+            placePixel();
+        } else if (block == "right") {
+            telemetry.addData("On right", "");
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI, 1.5);
+            placePixel();
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1.5);
+        } else {
+            telemetry.addData("In middle", "");
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI / 2, 1);
+            placePixel();
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1);
+        }
     }
 
     private int colourToSign(String colour) {
@@ -66,46 +115,45 @@ public class Auto1 extends LinearOpMode {
     }
 
 
-    private void blueFront() {
+    private void blueFront(String block) {
         Orientation initialOrientation = robotMove.getIMUOrientation();
+        robotProcesses.moveRobotTime(0, 0.8, 1.1);
 
-        telemetry.addData("On left", "");
-        robotProcesses.moveRobotTime(0, 0.8, 0.8);
-        robotMove.robotCentricMovement(0, 0, 0, 0);
-        // place pixel
-        placePixel();
+        placePixelMove(block, initialOrientation);
 
-        try {
-            TimeUnit.MILLISECONDS.sleep(780);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        lowerArm();
-        robotProcesses.moveRobotTime(0, -0.8, 0.8);
-        robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI/2, 1);
+        robotProcesses.moveRobotTime(0, -0.8, 1.1);
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI / 2, 1);
         telemetry.addData("Turned and placed pixel", "");
 
         // move to taped area
         robotProcesses.moveRobotTime(0, -1, 1.6);
     }
 
-    private void blueBack() {
+    private void blueFrontModified(String block) {
         Orientation initialOrientation = robotMove.getIMUOrientation();
+        robotProcesses.moveRobotTime(0, 0.8, 1.1);
 
-        telemetry.addData("On left", "");
-        robotProcesses.moveRobotTime(0, 0.8, 0.8);
+        robotProcesses.moveRobotTime(0, -0.8, 1.1);
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI / 2, 1);
+        telemetry.addData("Turned and placed pixel", "");
+
+        // move to taped area
+        robotProcesses.moveRobotTime(0, -1, 0.8);
         robotMove.robotCentricMovement(0, 0, 0, 0);
-        // place pixel
-        placePixel();
 
-        try {
-            TimeUnit.MILLISECONDS.sleep(780);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1);
+        robotProcesses.moveRobotTime(0, 1, 0.9);
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI/2, 1);
+        robotProcesses.moveRobotTime(0, -1, 0.6);
+    }
 
-        lowerArm();
+    private void blueBack(String block) {
+        Orientation initialOrientation = robotMove.getIMUOrientation();
+        robotProcesses.moveRobotTime(0, 0.8, 1.1);
+        robotMove.robotCentricMovement(0, 0, 0, 0);
+
+        placePixelMove(block, initialOrientation);
+
         robotProcesses.moveRobotTime(0, 0.8, 0.69);
         robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI/2, 1);
         telemetry.addData("Turned and placed pixel", "");
@@ -114,46 +162,45 @@ public class Auto1 extends LinearOpMode {
         robotProcesses.moveRobotTime(0, -1, 3.69);
     }
 
-    private void redFront() {
+    @Override
+    public void updateTelemetry(Telemetry telemetry) {
+        super.updateTelemetry(telemetry);
+    }
+
+    private void blueBackModified(String block) {
         Orientation initialOrientation = robotMove.getIMUOrientation();
-
-        telemetry.addData("On left", "");
-        robotProcesses.moveRobotTime(0, 0.8, 0.8);
+        robotProcesses.moveRobotTime(0, 0.8, 1.73);
         robotMove.robotCentricMovement(0, 0, 0, 0);
-        // place pixel
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI/2, 1);
+        telemetry.addData("Turned and placed pixel", "");
+
+        // move to taped area
+        robotProcesses.moveRobotTime(0, -1, 2.9);
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1);
         placePixel();
+    }
 
-        try {
-            TimeUnit.MILLISECONDS.sleep(780);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private void redFront(String block) {
+        Orientation initialOrientation = robotMove.getIMUOrientation();
+        robotProcesses.moveRobotTime(0, 0.8, 1.1);
 
-        lowerArm();
-        robotProcesses.moveRobotTime(0, -0.8, 0.8);
-        robotProcesses.turnToOrientation(initialOrientation.firstAngle + Math.PI/2, 1);
+        placePixelMove(block, initialOrientation);
+
+        robotProcesses.moveRobotTime(0, -0.8, 1.1);
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle + Math.PI / 2, 1);
         telemetry.addData("Turned and placed pixel", "");
 
         // move to taped area
         robotProcesses.moveRobotTime(0, -1, 1.6);
     }
 
-    private void redBack() {
+    private void redBack(String block) {
         Orientation initialOrientation = robotMove.getIMUOrientation();
-
-        telemetry.addData("On left", "");
-        robotProcesses.moveRobotTime(0, 0.8, 0.8);
+        robotProcesses.moveRobotTime(0, 0.8, 1.1);
         robotMove.robotCentricMovement(0, 0, 0, 0);
-        // place pixel
-        placePixel();
 
-        try {
-            TimeUnit.MILLISECONDS.sleep(780);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        placePixelMove(block, initialOrientation);
 
-        lowerArm();
         robotProcesses.moveRobotTime(0, 0.8, 0.69);
         robotProcesses.turnToOrientation(initialOrientation.firstAngle + Math.PI/2, 1);
         telemetry.addData("Turned and placed pixel", "");
@@ -164,8 +211,8 @@ public class Auto1 extends LinearOpMode {
 
     private void lowerArm() {
 
-        robotArm.motorArmLeft.setPower(0.2);
-        robotArm.motorArmRight.setPower(0.2);
+        robotArm.motorArmLeft.setPower(0.3);
+        robotArm.motorArmRight.setPower(0.3);
 
         try {
             TimeUnit.MILLISECONDS.sleep(780);

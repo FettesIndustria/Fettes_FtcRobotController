@@ -63,7 +63,7 @@ public class RobotArm {
         servoArm.setDirection(Servo.Direction.FORWARD);
         servoHand.setDirection(Servo.Direction.FORWARD);
         servoHand.setPosition(SERVO_HAND_CLOSED);
-        servoArm.setPosition(SERVO_ARM_UP);
+        servoArm.setPosition(SERVO_ARM_DOWN);
     }
 
     public void openHand() {servoHand.setPosition(SERVO_HAND_OPEN);}
