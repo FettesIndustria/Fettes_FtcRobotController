@@ -9,15 +9,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class RobotArm {
-    public DcMotor motorArmLeft, motorArmRight, motorBrush;
-    public Servo servoArm, servoHand, servoPixel;
+    public DcMotor motorArmLeft, motorArmRight;
+    public Servo servoArm, servoHand;
     private Gamepad gamepad;
     private ControllerInputHandler controllerInput;
     private static final double ARM_POWER = 0.3;
-    private static final double BRUSH_POWER = 0.5;
     private static final double HAND_ANGLE_INCREMENT = 0.025;
     private static final double SERVO_ARM_ANGLE_INCREMENT = 0.025;
-    public static final double SERVO_HAND_CLOSED = 0;
+    public static final double SERVO_HAND_CLOSED = 0.0;
     public static final double SERVO_HAND_OPEN = 0.05;
     public static final double SERVO_ARM_DOWN = 0.55;
     public static final double SERVO_ARM_UP = 0.7;
@@ -25,26 +24,20 @@ public class RobotArm {
     public static final int MOTOR_ARM_DOWN = -105;
     public static final int MOTOR_ARM_UP = -9;
     public static final int MOTOR_ARM_BOARD = 10;
-    public static final double SERVO_PIXEL_CLOSED = 0.0;
-    public static final double SERVO_PIXEL_OPEN = 0.055;
-
     private Telemetry telemetry;
-    public Button brushButton, handButton, handReleaseButton, motorArmUpButton, motorArmDownButton, servoArmUpButton, servoArmDownButton, armDownButton, armUpButton, armBoardButton;
-    public Button pixelButton;
+    public Button handButton, handReleaseButton, motorArmUpButton, motorArmDownButton, servoArmUpButton, servoArmDownButton, armDownButton, armUpButton, armBoardButton;
     public double handAngle, servoArmAngle;
 
     public RobotArm(HardwareMap hardwareMap, Gamepad gamepad, Telemetry telemetry) {
         motorArmLeft = hardwareMap.get(DcMotor.class, "motorArmLeft");
         motorArmRight = hardwareMap.get(DcMotor.class, "motorArmRight");
-        motorBrush = hardwareMap.get(DcMotor.class, "motorBrush");
         servoArm = hardwareMap.get(Servo.class, "servoArm");
         servoHand = hardwareMap.get(Servo.class, "servoHand");
-        servoPixel = hardwareMap.get(Servo.class, "servoPixel");
+
         this.gamepad = gamepad;
         this.telemetry = telemetry;
 
         controllerInput = new ControllerInputHandler(gamepad);
-        brushButton = new Button("leftstickbutton", false);
         handButton = new Button("triangle", false);
         handReleaseButton = new Button("circle", false);
         motorArmUpButton = new Button("leftbumper", false);
@@ -54,7 +47,6 @@ public class RobotArm {
         armDownButton = new Button("dpaddown", false);
         armUpButton = new Button("dpadup", false);
         armBoardButton = new Button("dpadleft", false);
-        pixelButton = new Button("square", false);
 
         initialiseMotors();
         handAngle = 0;
@@ -64,14 +56,12 @@ public class RobotArm {
     private void initialiseMotors() {
         motorArmLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         motorArmRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorBrush.setDirection(DcMotorSimple.Direction.REVERSE);
         servoArm.setDirection(Servo.Direction.FORWARD);
         servoHand.setDirection(Servo.Direction.FORWARD);
         servoHand.setPosition(SERVO_HAND_OPEN);
         servoArm.setPosition(SERVO_ARM_DOWN);
         motorArmLeft.setTargetPosition(MOTOR_ARM_DOWN);
         motorArmRight.setTargetPosition(MOTOR_ARM_DOWN);
-        servoPixel.setPosition(SERVO_PIXEL_CLOSED);
     }
 
     public void moveArmDown() {
@@ -94,7 +84,6 @@ public class RobotArm {
 
     public void doArmMovement() {
         // update arm buttons
-        controllerInput.updateButton(brushButton);
         controllerInput.updateButton(motorArmUpButton);
         controllerInput.updateButton(motorArmDownButton);
 
@@ -102,14 +91,10 @@ public class RobotArm {
         if (controllerInput.updateButton(handButton)) {
             handAngle += HAND_ANGLE_INCREMENT;
             servoHand.setPosition(handAngle);
-
-            servoPixel.setPosition(SERVO_PIXEL_OPEN);
         }
         if (controllerInput.updateButton(handReleaseButton)) {
             handAngle -= HAND_ANGLE_INCREMENT;
             servoHand.setPosition(handAngle);
-
-            servoPixel.setPosition(SERVO_PIXEL_CLOSED);
         }
 
         // servo arm buttons
@@ -124,24 +109,21 @@ public class RobotArm {
 
         // arm movement buttons
         if (controllerInput.updateButton(armDownButton)) {
+            telemetry.addData("Moving arm down", "");
             moveArmDown();
         }
         if (controllerInput.updateButton(armUpButton)) {
+            telemetry.addData("Moving arm up", "");
             moveArmUp();
         }
         if (controllerInput.updateButton(armBoardButton)) {
+            telemetry.addData("Moving arm to board", "");
             moveArmBoard();
         }
-
-
-        //if (controllerInput.updateButton(pixelButton)) {
-        //    servoPixel.setPosition(pixelButton.onMode ? SERVO_PIXEL_OPEN : SERVO_PIXEL_CLOSED);
-        //}
 
         servoHand.setPosition(handAngle);
         servoArm.setPosition(servoArmAngle);
 
-        motorBrush.setPower(brushButton.onMode ? BRUSH_POWER : 0);
         motorArmLeft.setPower(motorArmUpButton.isPressed ? ARM_POWER : (motorArmDownButton.isPressed ? -ARM_POWER : 0));
         motorArmRight.setPower(motorArmUpButton.isPressed ? ARM_POWER : (motorArmDownButton.isPressed ? -ARM_POWER : 0));
     }

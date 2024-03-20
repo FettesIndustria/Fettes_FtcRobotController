@@ -6,18 +6,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.task.vision.detector.Detection;
 import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 @Autonomous(name = "Auto", group = "Autonomous")
@@ -27,26 +22,22 @@ public class Auto extends LinearOpMode {
     private RobotArm robotArm;
     private Gamepad gamepad;
     private RobotProcesses robotProcesses;
+    private RobotExtras robotExtras;
     private static final double SERVO_PIXEL_CLOSED_POSITION = 0.3;
     private static final int MOTOR_ARM_DOWN_POSITION = -6;
     private static final int MOTOR_ARM_UP_POSITION = 20;
 
     @Override
     public void runOpMode() {
-
-
-        telemetry.addData("actualy mate please work", 1);
-        telemetry.update();
-
         robotMove = new RobotMove(hardwareMap, gamepad, telemetry);
         robotArm = new RobotArm(hardwareMap, gamepad, telemetry);
         robotProcesses = new RobotProcesses(robotMove, robotArm);
-
+        robotExtras = new RobotExtras(hardwareMap, gamepad, telemetry);
 
         robotArm.motorArmLeft.setTargetPosition(MOTOR_ARM_DOWN_POSITION);
         robotArm.motorArmRight.setTargetPosition(MOTOR_ARM_DOWN_POSITION);
 
-        WebcamName webcamName = hardwareMap.get(WebcamName.class, "camera");
+        /*WebcamName webcamName = hardwareMap.get(WebcamName.class, "camera");
         OpenCvCamera camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName);
 
         MyPipeline myPipeline = new MyPipeline();
@@ -56,16 +47,16 @@ public class Auto extends LinearOpMode {
             initializeObjectDetector();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 
         waitForStart();
 
-        sleep(3000);
 
 
 
 
-        while(opModeIsActive()){
+
+        /*while(opModeIsActive()){
 
             Mat frame = myPipeline.getCameraFrame();
             if(performObjectDetection(myPipeline)){
@@ -78,9 +69,7 @@ public class Auto extends LinearOpMode {
             }
             sleep(3000);
 
-        }
-
-
+        }*/
 
 
         /*
@@ -116,15 +105,15 @@ public class Auto extends LinearOpMode {
          */
     }
 
-    private void initializeObjectDetector() throws IOException {
+    /*private void initializeObjectDetector() throws IOException {
         // Load TensorFlow Lite model (replace modelPath with your model's path)
-        File modelFile = new File("Fettes_FtcRobotController\\TeamCode\\src\\main\\assets\\model_unquant");
+        File modelFile = new File("TeamCode/src/main/java/org/firstinspires/ftc/teamcode/model_unquant.tfliteava/org/firstinspires/ftc/teamcode/model_unquant.tflite");
 
-// Initialize ObjectDetector with options (you can configure detection parameters here)
+        // Initialize ObjectDetector with options (you can configure detection parameters here)
         ObjectDetector.ObjectDetectorOptions options = ObjectDetector.ObjectDetectorOptions.builder().setMaxResults(5).build();
         objectdetector123 = ObjectDetector.createFromFileAndOptions(modelFile, options);
 
-    }
+    }*/
 
 
     private boolean performObjectDetection(MyPipeline pipeline) {
@@ -152,7 +141,7 @@ public class Auto extends LinearOpMode {
             telemetry.addData("Motor arm right:", robotArm.motorArmLeft.getCurrentPosition());
             telemetry.addData("Servo arm:", robotArm.servoArm.getPosition());
             telemetry.addData("Servo hand:", robotArm.servoHand.getPosition());
-            telemetry.addData("Servo pixel:", robotArm.servoPixel.getPosition());
+            telemetry.addData("Servo pixel:", robotExtras.servoPixel.getPosition());
             telemetry.update();
 
             try {
@@ -184,8 +173,8 @@ public class Auto extends LinearOpMode {
     }
 
     private void placePixel() {
-        robotArm.servoPixel.setPosition(SERVO_PIXEL_CLOSED_POSITION - 0.1);
-        robotArm.servoPixel.setPosition(SERVO_PIXEL_CLOSED_POSITION);
+        robotExtras.servoPixel.setPosition(SERVO_PIXEL_CLOSED_POSITION - 0.1);
+        robotExtras.servoPixel.setPosition(SERVO_PIXEL_CLOSED_POSITION);
     }
 
     private int colourToSign(String colour) {

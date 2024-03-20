@@ -9,7 +9,7 @@ public class Main extends OpMode {
     private RobotMove robotMove;
     private SettingsManager settings;
     private RobotArm robotArm;
-
+    private RobotExtras robotExtras;
 
     @Override
     public void init() {
@@ -17,6 +17,7 @@ public class Main extends OpMode {
         robotMove = new RobotMove(hardwareMap, gamepad1, telemetry);
         settings = new SettingsManager(gamepad1, robotMove, telemetry);
         robotArm = new RobotArm(hardwareMap, gamepad1, telemetry);
+        robotExtras = new RobotExtras(hardwareMap, gamepad1, telemetry);
     }
 
     @Override
@@ -28,6 +29,7 @@ public class Main extends OpMode {
         } else {
             robotMove.doRobotMovement();
             robotArm.doArmMovement();
+            robotExtras.doHardwareMovement();
             feedbackPositions();
         }
         telemetry.update();
