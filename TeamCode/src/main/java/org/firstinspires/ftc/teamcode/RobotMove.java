@@ -74,7 +74,7 @@ public class RobotMove {
                 new IMU.Parameters(
                         new RevHubOrientationOnRobot(
                                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+                                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
                         )
                 )
         );

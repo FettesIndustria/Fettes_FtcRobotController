@@ -46,7 +46,22 @@ public class RobotProcesses extends Auto{
                 // Handle the interruption (e.g., log it or throw a new exception)
             }
         }
+    }
 
+    public void setArmDown() {
+        robotArm.motorArmLeft.setTargetPosition(-162);
+        robotArm.motorArmRight.setTargetPosition(-90);
+
+    }
+
+    public void setArmBoard() {
+        robotArm.motorArmLeft.setTargetPosition(-85);
+        robotArm.motorArmRight.setTargetPosition(-13);
+    }
+
+    public void pickUpPixel() {
+        // make sure arm is in down position first
+        setArmDown();
     }
 
 }

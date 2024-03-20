@@ -10,6 +10,7 @@ public class Main extends OpMode {
     private SettingsManager settings;
     private RobotArm robotArm;
 
+
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
@@ -27,7 +28,16 @@ public class Main extends OpMode {
         } else {
             robotMove.doRobotMovement();
             robotArm.doArmMovement();
+            feedbackPositions();
         }
+        telemetry.update();
+    }
+
+    private void feedbackPositions() {
+        telemetry.addData("Motor arm left:", robotArm.motorArmLeft.getCurrentPosition());
+        telemetry.addData("Motor arm right:", robotArm.motorArmLeft.getCurrentPosition());
+        telemetry.addData("Servo arm:", robotArm.servoArm.getPosition());
+        telemetry.addData("Servo hand:", robotArm.servoHand.getPosition());
         telemetry.update();
     }
 
