@@ -14,9 +14,10 @@ import org.tensorflow.lite.task.vision.detector.Detection;
 import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-@Autonomous(name = "Auto", group = "Autonomous")
-public class Auto extends LinearOpMode {
+@Autonomous(name = "Auto1", group = "Autonomous")
+public class Auto1 extends LinearOpMode {
     private ObjectDetector objectdetector123;
     private RobotMove robotMove;
     private RobotArm robotArm;
@@ -34,9 +35,6 @@ public class Auto extends LinearOpMode {
         robotProcesses = new RobotProcesses(robotMove, robotArm);
         robotExtras = new RobotExtras(hardwareMap, gamepad, telemetry);
 
-        robotArm.motorArmLeft.setTargetPosition(MOTOR_ARM_DOWN_POSITION);
-        robotArm.motorArmRight.setTargetPosition(MOTOR_ARM_DOWN_POSITION);
-
         /*WebcamName webcamName = hardwareMap.get(WebcamName.class, "camera");
         OpenCvCamera camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName);
 
@@ -51,9 +49,8 @@ public class Auto extends LinearOpMode {
 
         waitForStart();
 
-
-
-
+        //awayBoardModified("blue", "middle");
+        runMode();
 
 
         /*while(opModeIsActive()){
@@ -173,8 +170,14 @@ public class Auto extends LinearOpMode {
     }
 
     private void placePixel() {
-        robotExtras.servoPixel.setPosition(SERVO_PIXEL_CLOSED_POSITION - 0.1);
-        robotExtras.servoPixel.setPosition(SERVO_PIXEL_CLOSED_POSITION);
+        robotExtras.servoPixel.setPosition(robotExtras.SERVO_PIXEL_CLOSED);
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            // Handle the interruption (e.g., log it or throw a new exception)
+            //robotMove.robotCentricMovement(0, 0, 0, 0);
+        }
+        robotExtras.servoPixel.setPosition(robotExtras.SERVO_PIXEL_OPEN);
     }
 
     private int colourToSign(String colour) {
@@ -251,6 +254,109 @@ public class Auto extends LinearOpMode {
         // place pixels on board
 
     }
+
+    private void awayBoardModified(String colour, String block) {
+        Orientation initialOrientation = robotMove.getIMUOrientation();
+        int sign = colourToSign(colour);
+
+        // turn left
+        // then move under truss
+        // then turn right again
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle + Math.PI/2 * sign, 1);
+        robotProcesses.moveRobotTime(0, 1, 2.5);
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1);
+
+        nearBoardModified(colour, block);
+    }
+
+    private void nearBoardModified(String colour, String block) {
+        Orientation initialOrientation = robotMove.getIMUOrientation();
+        int sign = colourToSign(colour);
+
+        // move robot slightly forward
+        robotProcesses.moveRobotTime(0, 1, 0.4);
+
+        if (block == "left") {
+            // on left
+            robotProcesses.moveRobotTime(0, 0.4, 0.3);
+            // place pixel
+            placePixel();
+            robotProcesses.moveRobotTime(0, -0.4, 0.3);
+        } else if (block == "right") {
+            // on right
+            robotProcesses.moveRobotTime(0, 0.4, 0.3);
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle + Math.PI, 1.5);
+            // place pixel
+            placePixel();
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1.5);
+            robotProcesses.moveRobotTime(0, -0.4, 0.3);
+        } else {
+            // in middle
+            telemetry.addData("In middle", "");
+            robotProcesses.moveRobotTime(0, 0.4, 0.5);
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI/2, 1);
+            // place pixel
+            placePixel();
+            robotProcesses.turnToOrientation(initialOrientation.firstAngle, 1);
+            robotProcesses.moveRobotTime(0, -0.4, 0.5);
+            telemetry.addData("Turned and placed pixel", "");
+        }
+
+        // move robot slightly backward
+        robotProcesses.moveRobotTime(0, -1, 0.4);
+
+        // move towards board and face away from it
+        robotProcesses.moveRobotTime(-3 / Math.sqrt(13) * sign, 2 / Math.sqrt(13), 3);
+        robotProcesses.turnToOrientation(robotMove.angleToRange(initialOrientation.firstAngle - Math.PI/2 * sign), 1.5);
+
+        // place pixels on board
+
+        robotArm.moveArmBoard();
+
+        // move to taped area
+        robotProcesses.moveRobotTime(1, 0, 2.2);
+        robotProcesses.moveRobotTime(0, -1, 0.5);
+    }
+
+    private void runMode() {
+        Orientation initialOrientation = robotMove.getIMUOrientation();
+
+        telemetry.addData("On left", "");
+        robotProcesses.moveRobotTime(0, 0.8, 0.8);
+        robotMove.robotCentricMovement(0, 0, 0, 0);
+        // place pixel
+        placePixel();
+
+        try {
+            TimeUnit.MILLISECONDS.sleep(780);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        lowerArm();
+        robotProcesses.moveRobotTime(0, -0.8, 0.8);
+        robotProcesses.turnToOrientation(initialOrientation.firstAngle - Math.PI/2, 1);
+        telemetry.addData("Turned and placed pixel", "");
+
+        // move to taped area
+        robotProcesses.moveRobotTime(0, -1, 1.6);
+    }
+
+    private void lowerArm() {
+
+        robotArm.motorArmLeft.setPower(0.2);
+        robotArm.motorArmRight.setPower(0.2);
+
+        try {
+            TimeUnit.MILLISECONDS.sleep(780);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        robotArm.motorArmLeft.setPower(0);
+        robotArm.motorArmRight.setPower(0);
+    }
+
 
     /*private boolean detectFrame() {
         final AtomicBoolean detectionResult = new AtomicBoolean(false);

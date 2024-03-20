@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-public class RobotProcesses extends Auto{
+public class RobotProcesses {
     private RobotMove robotMove;
     private RobotArm robotArm;
 
@@ -26,6 +26,8 @@ public class RobotProcesses extends Auto{
                 robotMove.robotCentricMovement(0, 0, 0, 0);
             }
         }
+
+        robotMove.robotCentricMovement(0, 0, 0, 0);
     }
 
     public void turnToOrientation(double targetAngle, double duration) {

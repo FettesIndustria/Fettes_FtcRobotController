@@ -56,16 +56,16 @@ public class RobotMove {
     }
 
     private void initialiseMotors() {
-        motorA.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorA.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorA.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        motorB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorB.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        motorC.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorC.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorC.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        motorD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorD.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorD.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 

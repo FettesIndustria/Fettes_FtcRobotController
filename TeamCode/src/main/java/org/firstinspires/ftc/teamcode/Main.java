@@ -15,9 +15,9 @@ public class Main extends OpMode {
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
         robotMove = new RobotMove(hardwareMap, gamepad1, telemetry);
-        settings = new SettingsManager(gamepad1, robotMove, telemetry);
         robotArm = new RobotArm(hardwareMap, gamepad1, telemetry);
         robotExtras = new RobotExtras(hardwareMap, gamepad1, telemetry);
+        settings = new SettingsManager(gamepad1, robotMove, robotExtras, telemetry);
     }
 
     @Override
@@ -25,6 +25,7 @@ public class Main extends OpMode {
         manageButtons();
 
         if (settings.settingsButton.onMode) {
+            robotMove.robotCentricMovement(0, 0, 0, 0);
             settings.doSettings();
         } else {
             robotMove.doRobotMovement();
@@ -38,8 +39,11 @@ public class Main extends OpMode {
     private void feedbackPositions() {
         telemetry.addData("Motor arm left:", robotArm.motorArmLeft.getCurrentPosition());
         telemetry.addData("Motor arm right:", robotArm.motorArmLeft.getCurrentPosition());
-        telemetry.addData("Servo arm:", robotArm.servoArm.getPosition());
+        telemetry.addData("Servo arm:", robotArm.servoArmAngle);
         telemetry.addData("Servo hand:", robotArm.servoHand.getPosition());
+
+        telemetry.addData("\nIMU orientation:", robotMove.getIMUOrientation().firstAngle);
+        telemetry.addData("Auto correct orientation:", robotMove.autoCorrectOrientation.firstAngle);
         telemetry.update();
     }
 

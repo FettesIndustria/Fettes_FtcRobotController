@@ -21,13 +21,6 @@ android {
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }
-
-    /*sourceSets {
-        main {
-            // Add the assets directory to the source set
-            assets.srcDirs = ['src/main/java/org/firstinspires/ftc/teamcode/model_unquant.tflite']
-        }
-    }*/
 }
 
 dependencies {

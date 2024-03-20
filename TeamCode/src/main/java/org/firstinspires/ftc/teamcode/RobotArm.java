@@ -13,19 +13,18 @@ public class RobotArm {
     public Servo servoArm, servoHand;
     private Gamepad gamepad;
     private ControllerInputHandler controllerInput;
-    private static final double ARM_POWER = 0.3;
-    private static final double HAND_ANGLE_INCREMENT = 0.025;
+    private static final double MOTOR_ARM_POWER = 0.26;
     private static final double SERVO_ARM_ANGLE_INCREMENT = 0.025;
     public static final double SERVO_HAND_CLOSED = 0.0;
-    public static final double SERVO_HAND_OPEN = 0.05;
-    public static final double SERVO_ARM_DOWN = 0.55;
-    public static final double SERVO_ARM_UP = 0.7;
-    public static final double SERVO_ARM_BOARD = 0.0;
-    public static final int MOTOR_ARM_DOWN = -105;
-    public static final int MOTOR_ARM_UP = -9;
-    public static final int MOTOR_ARM_BOARD = 10;
+    public static final double SERVO_HAND_OPEN = 0.056;
+    public static final double SERVO_ARM_DOWN = 1.00;//0.55 ;
+    public static final double SERVO_ARM_UP = 1.125;
+    public static final double SERVO_ARM_BOARD = 0.475;
+    public static final int MOTOR_ARM_DOWN = -8;
+    public static final int MOTOR_ARM_UP = 96;
+    public static final int MOTOR_ARM_BOARD = 118;
     private Telemetry telemetry;
-    public Button handButton, handReleaseButton, motorArmUpButton, motorArmDownButton, servoArmUpButton, servoArmDownButton, armDownButton, armUpButton, armBoardButton;
+    public Button handToggleButton, motorArmUpButton, motorArmDownButton, servoArmUpButton, servoArmDownButton, armDownButton, armUpButton, armBoardButton;
     public double handAngle, servoArmAngle;
 
     public RobotArm(HardwareMap hardwareMap, Gamepad gamepad, Telemetry telemetry) {
@@ -38,15 +37,15 @@ public class RobotArm {
         this.telemetry = telemetry;
 
         controllerInput = new ControllerInputHandler(gamepad);
-        handButton = new Button("triangle", false);
-        handReleaseButton = new Button("circle", false);
         motorArmUpButton = new Button("leftbumper", false);
         motorArmDownButton = new Button("rightbumper", false);
         servoArmUpButton = new Button("lefttrigger", false);
         servoArmDownButton = new Button("righttrigger", false);
-        armDownButton = new Button("dpaddown", false);
-        armUpButton = new Button("dpadup", false);
-        armBoardButton = new Button("dpadleft", false);
+        handToggleButton = new Button("circle", false);
+
+        motorArmLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorArmRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
 
         initialiseMotors();
         handAngle = 0;
@@ -56,25 +55,20 @@ public class RobotArm {
     private void initialiseMotors() {
         motorArmLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         motorArmRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorArmLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorArmRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorArmLeft.setPower(MOTOR_ARM_POWER);
+        motorArmRight.setPower(MOTOR_ARM_POWER);
+
         servoArm.setDirection(Servo.Direction.FORWARD);
         servoHand.setDirection(Servo.Direction.FORWARD);
-        servoHand.setPosition(SERVO_HAND_OPEN);
-        servoArm.setPosition(SERVO_ARM_DOWN);
-        motorArmLeft.setTargetPosition(MOTOR_ARM_DOWN);
-        motorArmRight.setTargetPosition(MOTOR_ARM_DOWN);
-    }
-
-    public void moveArmDown() {
-        servoArm.setPosition(SERVO_ARM_DOWN);
-        motorArmLeft.setTargetPosition(MOTOR_ARM_DOWN);
-        motorArmRight.setTargetPosition(MOTOR_ARM_DOWN);
-    }
-
-    public void moveArmUp() {
+        servoHand.setPosition(SERVO_HAND_CLOSED);
         servoArm.setPosition(SERVO_ARM_UP);
-        motorArmLeft.setTargetPosition(MOTOR_ARM_UP);
-        motorArmRight.setTargetPosition(MOTOR_ARM_UP);
     }
+
+    public void openHand() {servoHand.setPosition(SERVO_HAND_OPEN);}
+    public void closeHand() {servoHand.setPosition(SERVO_HAND_CLOSED);}
+
 
     public void moveArmBoard() {
         servoArm.setPosition(SERVO_ARM_BOARD);
@@ -88,44 +82,25 @@ public class RobotArm {
         controllerInput.updateButton(motorArmDownButton);
 
         // hand buttons
-        if (controllerInput.updateButton(handButton)) {
-            handAngle += HAND_ANGLE_INCREMENT;
-            servoHand.setPosition(handAngle);
-        }
-        if (controllerInput.updateButton(handReleaseButton)) {
-            handAngle -= HAND_ANGLE_INCREMENT;
-            servoHand.setPosition(handAngle);
+        if (controllerInput.updateButton(handToggleButton)) {
+            servoHand.setPosition(handToggleButton.onMode ? SERVO_HAND_OPEN : SERVO_HAND_CLOSED);
         }
 
         // servo arm buttons
         if (controllerInput.updateButton(servoArmUpButton)) {
             servoArmAngle += SERVO_ARM_ANGLE_INCREMENT;
             servoArm.setPosition(servoArmAngle);
+            telemetry.addData("arm going up", "");
         }
         if (controllerInput.updateButton(servoArmDownButton)) {
             servoArmAngle -= SERVO_ARM_ANGLE_INCREMENT;
+            if (servoArmAngle < 0) servoArmAngle = 0;   // set limit at position 0
             servoArm.setPosition(servoArmAngle);
+            telemetry.addData("arm going down", "");
         }
 
-        // arm movement buttons
-        if (controllerInput.updateButton(armDownButton)) {
-            telemetry.addData("Moving arm down", "");
-            moveArmDown();
-        }
-        if (controllerInput.updateButton(armUpButton)) {
-            telemetry.addData("Moving arm up", "");
-            moveArmUp();
-        }
-        if (controllerInput.updateButton(armBoardButton)) {
-            telemetry.addData("Moving arm to board", "");
-            moveArmBoard();
-        }
-
-        servoHand.setPosition(handAngle);
-        servoArm.setPosition(servoArmAngle);
-
-        motorArmLeft.setPower(motorArmUpButton.isPressed ? ARM_POWER : (motorArmDownButton.isPressed ? -ARM_POWER : 0));
-        motorArmRight.setPower(motorArmUpButton.isPressed ? ARM_POWER : (motorArmDownButton.isPressed ? -ARM_POWER : 0));
+        motorArmLeft.setPower(motorArmUpButton.isPressed ? MOTOR_ARM_POWER : (motorArmDownButton.isPressed ? -MOTOR_ARM_POWER : 0));
+        motorArmRight.setPower(motorArmUpButton.isPressed ? MOTOR_ARM_POWER : (motorArmDownButton.isPressed ? -MOTOR_ARM_POWER : 0));
     }
 }
 
