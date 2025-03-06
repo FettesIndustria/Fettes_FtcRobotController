@@ -1,14 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Gamepad;
-
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.tensorflow.lite.task.vision.detector.ObjectDetector;
-
-import java.util.concurrent.TimeUnit;
-
+/*
 @Autonomous(name = "Auto2", group = "Autonomous")
 public class Auto2 extends LinearOpMode {
     private ObjectDetector objectdetector123;
@@ -39,7 +31,7 @@ public class Auto2 extends LinearOpMode {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }*/
-
+/*
         waitForStart();
 
         //awayBoardModified("blue", "middle");
@@ -107,4 +99,4 @@ public class Auto2 extends LinearOpMode {
         robotArm.motorArmLeft.setPower(0);
         robotArm.motorArmRight.setPower(0);
     }
-}
+}*/

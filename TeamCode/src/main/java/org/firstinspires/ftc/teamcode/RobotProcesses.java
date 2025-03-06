@@ -2,11 +2,11 @@ package org.firstinspires.ftc.teamcode;
 
 public class RobotProcesses {
     private RobotMove robotMove;
-    private RobotArm robotArm;
+    private RobotExtras robotExtras;
 
-    public RobotProcesses(RobotMove robotMove, RobotArm robotArm) {
+    public RobotProcesses(RobotMove robotMove, RobotExtras robotExtras) {
         this.robotMove = robotMove;
-        this.robotArm = robotArm;
+        this.robotExtras = robotExtras;
     }
 
     public void moveRobotTime(double x, double y, double seconds) {
@@ -50,9 +50,9 @@ public class RobotProcesses {
         }
     }
 
-    public void setArmDown() {
-        robotArm.motorArmLeft.setTargetPosition(-162);
-        robotArm.motorArmRight.setTargetPosition(-90);
+    /*public void setArmDown() {
+        robotExtras.motorArmLeft.setTargetPosition(-162);
+        robotExttas.motorArmRight.setTargetPosition(-90);
 
     }
 
@@ -64,6 +64,6 @@ public class RobotProcesses {
     public void pickUpPixel() {
         // make sure arm is in down position first
         setArmDown();
-    }
+    }*/
 
 }

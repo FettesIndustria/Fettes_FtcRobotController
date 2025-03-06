@@ -1,13 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Gamepad;
-
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
-import java.util.concurrent.TimeUnit;
-
+/*
 @Autonomous(name = "Auto3", group = "Autonomous")
 public class Auto3 extends LinearOpMode {
     private RobotMove robotMove;
@@ -37,7 +30,7 @@ public class Auto3 extends LinearOpMode {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }*/
-
+/*
         waitForStart();
 
         //awayBoardModified("blue", "middle");
@@ -105,4 +98,4 @@ public class Auto3 extends LinearOpMode {
         robotArm.motorArmLeft.setPower(0);
         robotArm.motorArmRight.setPower(0);
     }
-}
+}*/

@@ -7,54 +7,48 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class Main extends OpMode {
     private ControllerInputHandler controllerInput;
     private RobotMove robotMove;
-    private SettingsManager settings;
-    private RobotArm robotArm;
     private RobotExtras robotExtras;
+    private SettingsManager settings;
 
     @Override
     public void init() {
         controllerInput = new ControllerInputHandler(gamepad1);
         robotMove = new RobotMove(hardwareMap, gamepad1, telemetry);
-        robotArm = new RobotArm(hardwareMap, gamepad1, telemetry);
         robotExtras = new RobotExtras(hardwareMap, gamepad1, telemetry);
-        settings = new SettingsManager(gamepad1, robotMove, robotExtras, telemetry);
+        settings = new SettingsManager(gamepad1, robotMove, telemetry);
     }
 
     @Override
     public void loop() {
         manageButtons();
-
         if (settings.settingsButton.onMode) {
-            robotMove.robotCentricMovement(0, 0, 0, 0);
+            telemetry.clearAll();
+            telemetry.addData("Settings Mode Active", "Stopping robot movement\n");
+            robotMove.robotCentricMovement(0, 0, 0, 0); // Ensure all motors are stopped
+            settings.printSettings();
             settings.doSettings();
         } else {
+            telemetry.addData("Left Stick X", controllerInput.getLeftStickX());
+            telemetry.addData("Left Stick Y", controllerInput.getLeftStickY());
+            telemetry.addData("Right Stick X", controllerInput.getRightStickX());
+
             robotMove.doRobotMovement();
-            robotArm.doArmMovement();
-            robotExtras.doHardwareMovement();
+            robotExtras.doHardwareMovement();  // Execute pulley, arm and hand movement logic
             feedbackPositions();
         }
         telemetry.update();
     }
 
     private void feedbackPositions() {
-        telemetry.addData("Motor arm left:", robotArm.motorArmLeft.getCurrentPosition());
-        telemetry.addData("Motor arm right:", robotArm.motorArmLeft.getCurrentPosition());
-        telemetry.addData("Servo arm:", robotArm.servoArmAngle);
-        telemetry.addData("Servo hand:", robotArm.servoHand.getPosition());
-
         telemetry.addData("\nIMU orientation:", robotMove.getIMUOrientation().firstAngle);
         telemetry.addData("Auto correct orientation:", robotMove.autoCorrectOrientation.firstAngle);
-        telemetry.update();
     }
 
     private void manageButtons() {
-        // check settings button
         if (controllerInput.updateButton(settings.settingsButton)) {
             if (settings.settingsButton.onMode) {
-                // in settings, print commands
                 settings.printSettings();
             } else {
-                // exited settings mode
                 telemetry.clearAll();
             }
         }

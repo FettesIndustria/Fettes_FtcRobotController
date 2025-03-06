@@ -15,7 +15,7 @@ import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
+/*
 @Autonomous(name = "Auto1", group = "Autonomous")
 public class Auto1 extends LinearOpMode {
     private ObjectDetector objectdetector123;
@@ -177,4 +177,4 @@ public class Auto1 extends LinearOpMode {
         robotArm.motorArmRight.setPower(0);
     }
 
-}
+}*/

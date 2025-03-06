@@ -9,56 +9,82 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class RobotExtras {
-    private HardwareMap hardwareMap;
+    public DcMotor motorPulley, motorArm;
+    public Servo servoHand;
     private Gamepad gamepad;
-    private Telemetry telemetry;
-    public Servo servoPixel, servoDrone;
-    public DcMotor motorBrush;
-    public static final double SERVO_PIXEL_CLOSED = 0.0;
-    public static final double SERVO_PIXEL_OPEN = 0.055;
-    public static final double SERVO_DRONE_CLOSED = 0.0;
-    public static final double SERVO_DRONE_OPEN = 2.2;
-
-    public Button brushButton, droneButton, reverseBrushButton;
-    private static final double BRUSH_POWER = 0.5;
     private ControllerInputHandler controllerInput;
+    private static final double MOTOR_ARM_POWER = 0.2;
+    private static final double MOTOR_PULLEY_POWER = 0.5;
+    private static final double SERVO_HAND_ANGLE_INCREMENT = 0.025;
+    private Telemetry telemetry;
+    public Button armUpButton, armDownButton, pulleyUpButton, pulleyDownButton, servoHandOpenButton, servoHandCloseButton;
+    public double servoHandAngle;
+
     public RobotExtras(HardwareMap hardwareMap, Gamepad gamepad, Telemetry telemetry) {
-        servoPixel = hardwareMap.get(Servo.class, "servoPixel");
-        motorBrush = hardwareMap.get(DcMotor.class, "motorBrush");
+        motorPulley = hardwareMap.get(DcMotor.class, "motorPulley");
+        motorArm = hardwareMap.get(DcMotor.class, "motorArm");
+        servoHand = hardwareMap.get(Servo.class, "servoHand");
 
-        motorBrush.setDirection(DcMotorSimple.Direction.REVERSE);
-        servoPixel.setPosition(SERVO_PIXEL_OPEN);
-
-        servoDrone = hardwareMap.get(Servo.class, "servoDrone");
-        servoDrone.setPosition(SERVO_DRONE_CLOSED);
-
-        controllerInput = new ControllerInputHandler(gamepad);
-        brushButton = new Button("leftstickbutton", false);
-        droneButton = new Button("square", false);
-        reverseBrushButton = new Button("rightstickbutton", false);
-        this.hardwareMap = hardwareMap;
         this.gamepad = gamepad;
         this.telemetry = telemetry;
+
+        controllerInput = new ControllerInputHandler(gamepad);
+        armUpButton = new Button("lefttrigger", false);
+        armDownButton = new Button("righttrigger", false);
+        pulleyUpButton = new Button("dpadup", false);
+        pulleyDownButton = new Button("dpaddown", false);
+        servoHandOpenButton = new Button("leftbumper", false);
+        servoHandCloseButton = new Button("rightbumper", false);
+
+        initialiseMotors();
+        servoHandAngle = 0;
     }
 
-    public void releaseDrone() {
-        servoDrone.setPosition(SERVO_DRONE_OPEN);
+    private void initialiseMotors() {
+        motorPulley.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorArm.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        motorPulley.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        motorPulley.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        motorPulley.setPower(MOTOR_ARM_POWER);
+        motorArm.setPower(MOTOR_PULLEY_POWER);
+
+        servoHand.setDirection(Servo.Direction.FORWARD);
+    }
+
+    public void openHand() {
+        servoHandAngle += SERVO_HAND_ANGLE_INCREMENT;
+        servoHand.setPosition(servoHandAngle);
+    }
+    public void closeHand() {
+        servoHandAngle -= SERVO_HAND_ANGLE_INCREMENT;
+        servoHand.setPosition(servoHandAngle);
     }
 
     public void doHardwareMovement() {
-        controllerInput.updateButton(brushButton);
-        motorBrush.setPower(brushButton.onMode ? BRUSH_POWER : 0);
+        // update arm buttons
+        controllerInput.updateButton(armUpButton);
+        controllerInput.updateButton(armDownButton);
 
-        if (controllerInput.updateButton(reverseBrushButton) && reverseBrushButton.onMode == false) {
-            motorBrush.setPower(0);
+        // update pulley buttons
+        controllerInput.updateButton(pulleyUpButton);
+        controllerInput.updateButton(pulleyDownButton);
+
+        // servo hand buttons
+        if (controllerInput.updateButton(servoHandOpenButton)) {
+            openHand();
+            telemetry.addData("hand opening", "");
         }
-        if (reverseBrushButton.onMode) {
-            motorBrush.setPower(-BRUSH_POWER);
+        if (controllerInput.updateButton(servoHandCloseButton)) {
+            closeHand();
+            telemetry.addData("hand closing", "");
         }
 
-        if (controllerInput.updateButton(droneButton)) {
-            telemetry.addData("Launching drone", "");
-            releaseDrone();
-        }
+        motorPulley.setPower(pulleyUpButton.isPressed ? MOTOR_PULLEY_POWER : (pulleyDownButton.isPressed ? -MOTOR_PULLEY_POWER : 0));
+        motorArm.setPower(armUpButton.isPressed ? MOTOR_ARM_POWER : (armDownButton.isPressed ? -MOTOR_ARM_POWER : 0));
     }
 }
