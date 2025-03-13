@@ -17,7 +17,7 @@ public class RobotExtras {
     private static final double MOTOR_PULLEY_POWER = 0.5;
     private static final double SERVO_HAND_ANGLE_INCREMENT = 0.025;
     private Telemetry telemetry;
-    public Button armUpButton, armDownButton, pulleyUpButton, pulleyDownButton, servoHandOpenButton, servoHandCloseButton;
+    public Button pulleyUpButton, pulleyDownButton, servoHandOpenButton, servoHandCloseButton;
     public double servoHandAngle;
 
     public RobotExtras(HardwareMap hardwareMap, Gamepad gamepad, Telemetry telemetry) {
@@ -29,8 +29,6 @@ public class RobotExtras {
         this.telemetry = telemetry;
 
         controllerInput = new ControllerInputHandler(gamepad);
-        armUpButton = new Button("lefttrigger", false);
-        armDownButton = new Button("righttrigger", false);
         pulleyUpButton = new Button("dpadup", false);
         pulleyDownButton = new Button("dpaddown", false);
         servoHandOpenButton = new Button("leftbumper", false);
@@ -41,17 +39,17 @@ public class RobotExtras {
     }
 
     private void initialiseMotors() {
+        motorPulley.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorPulley.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //motorPulley.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         motorPulley.setDirection(DcMotorSimple.Direction.FORWARD);
         motorArm.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        motorPulley.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        motorPulley.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        motorPulley.setPower(MOTOR_ARM_POWER);
-        motorArm.setPower(MOTOR_PULLEY_POWER);
+        motorPulley.setPower(MOTOR_PULLEY_POWER);
+        motorArm.setPower(0);
 
         servoHand.setDirection(Servo.Direction.FORWARD);
     }
@@ -66,10 +64,6 @@ public class RobotExtras {
     }
 
     public void doHardwareMovement() {
-        // update arm buttons
-        controllerInput.updateButton(armUpButton);
-        controllerInput.updateButton(armDownButton);
-
         // update pulley buttons
         controllerInput.updateButton(pulleyUpButton);
         controllerInput.updateButton(pulleyDownButton);
@@ -84,7 +78,12 @@ public class RobotExtras {
             telemetry.addData("hand closing", "");
         }
 
+        // motor arm triggers
+        double leftTrigger = controllerInput.leftTrigger();
+        double rightTrigger = controllerInput.rightTrigger();
+        motorArm.setPower((leftTrigger - rightTrigger) * MOTOR_ARM_POWER);
+
+        // motor pulley
         motorPulley.setPower(pulleyUpButton.isPressed ? MOTOR_PULLEY_POWER : (pulleyDownButton.isPressed ? -MOTOR_PULLEY_POWER : 0));
-        motorArm.setPower(armUpButton.isPressed ? MOTOR_ARM_POWER : (armDownButton.isPressed ? -MOTOR_ARM_POWER : 0));
     }
 }
